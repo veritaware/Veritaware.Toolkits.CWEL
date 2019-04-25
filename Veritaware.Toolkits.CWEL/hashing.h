@@ -10,7 +10,8 @@
 
 namespace veritaware
 {
-	namespace hashing {
+	namespace hashing
+	{
 		EXPORT int32_t GetHashCode(bool value);
 		EXPORT int32_t GetHashCode(int8_t value);
 		EXPORT int32_t GetHashCode(uint8_t value);
