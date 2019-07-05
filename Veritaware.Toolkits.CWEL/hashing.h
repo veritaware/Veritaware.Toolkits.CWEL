@@ -26,6 +26,12 @@ namespace veritaware
 		EXPORT int32_t GetHashCode(const char * value);
 		EXPORT int32_t GetHashCode(std::string & value);
 		EXPORT int32_t CombineHashCodes(int32_t hash1, int32_t hash2);
+
+		struct EXPORT IHashable //NOLINT
+		{
+			virtual ~IHashable() = default;
+			virtual int32_t GetHashCode() = 0;
+		};
 	}
 }
 
