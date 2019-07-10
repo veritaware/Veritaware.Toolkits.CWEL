@@ -155,9 +155,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Color.h" />
     <ClInclude Include="hashing.h" />
+    <ClInclude Include="shortns.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="streaming.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="vector_ext.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
@@ -168,6 +172,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="streaming.cpp" />
+    <ClCompile Include="vector_ext.cpp" />
     <ClCompile Include="Veritaware.Toolkits.CWEL.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
