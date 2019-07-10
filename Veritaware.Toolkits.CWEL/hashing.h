@@ -10,29 +10,29 @@
 
 namespace veritaware
 {
-	namespace hashing
-	{
-		EXPORT int32_t GetHashCode(bool value);
-		EXPORT int32_t GetHashCode(int8_t value);
-		EXPORT int32_t GetHashCode(uint8_t value);
-		EXPORT int32_t GetHashCode(int16_t value);
-		EXPORT int32_t GetHashCode(uint16_t value);
-		EXPORT int32_t GetHashCode(int32_t value);
-		EXPORT int32_t GetHashCode(uint32_t value);
-		EXPORT int32_t GetHashCode(int64_t value);
-		EXPORT int32_t GetHashCode(uint64_t value);
-		EXPORT int32_t GetHashCode(float value);
-		EXPORT int32_t GetHashCode(double value);
-		EXPORT int32_t GetHashCode(const char * value);
-		EXPORT int32_t GetHashCode(std::string & value);
-		EXPORT int32_t CombineHashCodes(int32_t hash1, int32_t hash2);
+	EXPORT int32_t GetHashCode(bool value);
+	EXPORT int32_t GetHashCode(int8_t value);
+	EXPORT int32_t GetHashCode(uint8_t value);
+	EXPORT int32_t GetHashCode(int16_t value);
+	EXPORT int32_t GetHashCode(uint16_t value);
+	EXPORT int32_t GetHashCode(int32_t value);
+	EXPORT int32_t GetHashCode(uint32_t value);
+	EXPORT int32_t GetHashCode(int64_t value);
+	EXPORT int32_t GetHashCode(uint64_t value);
+	EXPORT int32_t GetHashCode(float value);
+	EXPORT int32_t GetHashCode(double value);
+	EXPORT int32_t GetHashCode(const char * value);
+	EXPORT int32_t GetHashCode(std::string & value);
+	EXPORT int32_t CombineHashCodes(int32_t hash1, int32_t hash2);
 
-		struct EXPORT IHashable //NOLINT
-		{
-			virtual ~IHashable() = default;
-			virtual int32_t GetHashCode() = 0;
-		};
-	}
+	struct EXPORT IHashable //NOLINT
+	{
+		virtual ~IHashable() = default;
+		virtual int32_t GetHashCode() = 0;
+
+	protected:
+		IHashable() = default;
+	};
 }
 
 #endif  //VERITAWARE_TOOLKITS_CWEL_HASHING_
