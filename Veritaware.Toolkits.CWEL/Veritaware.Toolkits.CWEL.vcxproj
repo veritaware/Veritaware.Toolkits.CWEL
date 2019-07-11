@@ -164,6 +164,7 @@
     <ClInclude Include="vector_ext.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="color.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="hashing.cpp" />
     <ClCompile Include="stdafx.cpp">
