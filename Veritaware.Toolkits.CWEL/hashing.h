@@ -22,13 +22,18 @@ namespace veritaware
 	EXPORT int32_t GetHashCode(float value);
 	EXPORT int32_t GetHashCode(double value);
 	EXPORT int32_t GetHashCode(const char * value);
-	EXPORT int32_t GetHashCode(std::string & value);
+	EXPORT int32_t GetHashCode(const std::string & value);
 	EXPORT int32_t CombineHashCodes(int32_t hash1, int32_t hash2);
 
 	struct EXPORT IHashable //NOLINT
 	{
 		virtual ~IHashable() = default;
-		virtual int32_t GetHashCode() = 0;
+		virtual int32_t GetHashCode() const = 0;
+
+		friend bool operator==(const IHashable& h1, const IHashable& h2)
+		{
+			return h1.GetHashCode() == h2.GetHashCode();
+		}
 
 	protected:
 		IHashable() = default;

@@ -81,7 +81,7 @@ int32_t veritaware::GetHashCode(const char* value)
 	return hash1 + hash2 * 1566083941;
 }
 
-int32_t veritaware::GetHashCode(std::string & value)
+int32_t veritaware::GetHashCode(const std::string & value)
 {
 	return GetHashCode(value.c_str());
 }
