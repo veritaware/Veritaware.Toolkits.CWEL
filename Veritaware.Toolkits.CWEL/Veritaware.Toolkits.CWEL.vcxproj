@@ -155,7 +155,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Color.h" />
+    <ClInclude Include="color.h" />
     <ClInclude Include="hashing.h" />
     <ClInclude Include="shortns.h" />
     <ClInclude Include="stdafx.h" />
