@@ -6,7 +6,7 @@
 namespace veritaware
 {
 	template<typename T>
-	void AddRange(std::vector<T> &dst, std::vector<T> &src);
+	void AddRange(std::vector<T> &dst, const std::vector<T> &src);
 
 	template<typename T>
 	void Reverse(std::vector<T> &v);

@@ -2,7 +2,7 @@
 #include "vector_ext.h"
 
 template<typename T>
-void veritaware::AddRange(std::vector<T> &dst, std::vector<T> &src)
+void veritaware::AddRange(std::vector<T> &dst, const std::vector<T> &src)
 {
 	dst.insert(dst.end(), src.begin(), src.end());
 }
