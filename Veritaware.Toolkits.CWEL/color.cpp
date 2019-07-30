@@ -27,8 +27,10 @@ namespace veritaware
 			RGBA(value);
 			break;
 		case BYTE_ORDER_BGRA:
+			BGRA(value);
 			break;
 		case BYTE_ORDER_ABGR:
+			ABGR(value);
 			break;
 		case BYTE_ORDER_ARGB:
 		default:
@@ -39,54 +41,54 @@ namespace veritaware
 
 	uint32_t Color::ARGB() const
 	{
-		return _a | _r << 8 | _g << 16 | _b << 24;
+		return _a << 24 | _r << 16 | _g << 8 | _b;
 	}
 
 	uint32_t Color::RGBA() const
 	{
-		return _r | _g << 8 | _b << 16 | _a << 24;
+		return _r << 24 | _g << 16 | _b << 8 | _a ;
 	}
 
 	uint32_t Color::ABGR() const
 	{
-		return _a | _b << 8 | _g << 16 | _r << 24;
+		return _a << 24 | _b << 16 | _g << 8 | _r;
 	}
 
 	uint32_t Color::BGRA() const
 	{
-		return _b | _g << 8 | _r << 16 | _a << 24;
+		return _b << 24 | _g << 16 | _r << 8 | _a;
 	}
 
 	void Color::ARGB(const uint32_t argb)
 	{
-		_a = argb & 0x000000ff;
-		_r = (argb & 0x0000ff00) >> 8;
-		_g = (argb & 0x00ff0000) >> 16;
-		_b = (argb & 0xff000000) >> 24;
+		_a = (argb & 0xff000000) >> 24;
+		_r = (argb & 0x00ff0000) >> 16;
+		_g = (argb & 0x0000ff00) >> 8;
+		_b = argb & 0x000000ff;
 	}
 
 	void Color::RGBA(const uint32_t rgba)
 	{
-		_r = rgba & 0x000000ff;
-		_g = (rgba & 0x0000ff00) >> 8;
-		_b = (rgba & 0x00ff0000) >> 16;
-		_a = (rgba & 0xff000000) >> 24;
+		_r = (rgba & 0xff000000) >> 24;
+		_g = (rgba & 0x00ff0000) >> 16;
+		_b = (rgba & 0x0000ff00) >> 8;
+		_a = rgba & 0x000000ff;
 	}
 
 	void Color::ABGR(const uint32_t abgr)
 	{
-		_a = abgr & 0x000000ff;
-		_b = (abgr & 0x0000ff00) >> 8;
-		_g = (abgr & 0x00ff0000) >> 16;
-		_r = (abgr & 0xff000000) >> 24;
+		_a = (abgr & 0xff000000) >> 24;
+		_b = (abgr & 0x00ff0000) >> 16;
+		_g = (abgr & 0x0000ff00) >> 8;
+		_r = abgr & 0x000000ff;
 	}
 
 	void Color::BGRA(const uint32_t bgra)
 	{
-		_b = bgra & 0x000000ff;
-		_g = (bgra & 0x0000ff00) >> 8;
-		_r = (bgra & 0x00ff0000) >> 16;
-		_a = (bgra & 0xff000000) >> 24;
+		_b = (bgra & 0xff000000) >> 24;
+		_g = (bgra & 0x00ff0000) >> 16;
+		_r = (bgra & 0x0000ff00) >> 8;
+		_a = bgra & 0x000000ff;
 	}
 
 	float Color::Trunc(const float f)
