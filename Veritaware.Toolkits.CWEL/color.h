@@ -13,6 +13,7 @@ namespace veritaware
 	struct Color
 	{
 		Color() = default;
+		Color(const Color & c);
 		Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 		Color(float r, float g, float b, float a);
 		explicit Color(uint32_t value, uint8_t byteOrder = BYTE_ORDER_ARGB);

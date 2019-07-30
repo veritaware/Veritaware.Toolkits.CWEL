@@ -3,6 +3,14 @@
 
 namespace veritaware
 {
+	Color::Color(const Color & c)
+	{
+		_r = c.R();
+		_g = c.G();
+		_b = c.B();
+		_a = c.A();
+	}
+
 	Color::Color(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a)
 	{
 		_r = r;
