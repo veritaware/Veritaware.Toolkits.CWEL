@@ -49,21 +49,37 @@ namespace veritaware
 
 	uint32_t Color::ARGB() const
 	{
+		auto r = static_cast<uint32_t>(_r);
+		auto g = static_cast<uint32_t>(_g);
+		auto b = static_cast<uint32_t>(_b);
+		auto a = static_cast<uint32_t>(_a);
 		return _a << 24 | _r << 16 | _g << 8 | _b;
 	}
 
 	uint32_t Color::RGBA() const
 	{
-		return _r << 24 | _g << 16 | _b << 8 | _a ;
+		auto r = static_cast<uint32_t>(_r);
+		auto g = static_cast<uint32_t>(_g);
+		auto b = static_cast<uint32_t>(_b);
+		auto a = static_cast<uint32_t>(_a);
+		return r << 24 | g << 16 | b << 8 | a ;
 	}
 
 	uint32_t Color::ABGR() const
 	{
+		auto r = static_cast<uint32_t>(_r);
+		auto g = static_cast<uint32_t>(_g);
+		auto b = static_cast<uint32_t>(_b);
+		auto a = static_cast<uint32_t>(_a);
 		return _a << 24 | _b << 16 | _g << 8 | _r;
 	}
 
 	uint32_t Color::BGRA() const
 	{
+		auto r = static_cast<uint32_t>(_r);
+		auto g = static_cast<uint32_t>(_g);
+		auto b = static_cast<uint32_t>(_b);
+		auto a = static_cast<uint32_t>(_a);
 		return _b << 24 | _g << 16 | _r << 8 | _a;
 	}
 

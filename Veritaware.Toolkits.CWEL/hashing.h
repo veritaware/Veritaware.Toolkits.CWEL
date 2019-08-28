@@ -35,6 +35,11 @@ namespace veritaware
 			return h1.GetHashCode() == h2.GetHashCode();
 		}
 
+		friend bool operator!=(const IHashable& h1, const IHashable& h2)
+		{
+			return h1.GetHashCode() != h2.GetHashCode();
+		}
+
 	protected:
 		IHashable() = default;
 	};

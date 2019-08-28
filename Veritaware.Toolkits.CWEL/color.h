@@ -2,6 +2,7 @@
 #define VERITAWARE_TOOLKITS_CWEL_COLOR_
 
 #include <cstdint>
+#include <cmath>
 
 namespace veritaware
 {
@@ -38,10 +39,10 @@ namespace veritaware
 		void B(const uint8_t b) { _b = b; }
 		void A(const uint8_t a) { _a = a; }
 
-		void R(const float r) { _r = static_cast<uint8_t>(Trunc(r) * 255); }
-		void G(const float g) { _g = static_cast<uint8_t>(Trunc(g) * 255); }
-		void B(const float b) { _b = static_cast<uint8_t>(Trunc(b) * 255); }
-		void A(const float a) { _a = static_cast<uint8_t>(Trunc(a) * 255); }
+		void R(const float r) { _r = static_cast<uint8_t>(round(r * 255.0f)); }
+		void G(const float g) { _g = static_cast<uint8_t>(round(g * 255.0f)); }
+		void B(const float b) { _b = static_cast<uint8_t>(round(b * 255.0f)); }
+		void A(const float a) { _a = static_cast<uint8_t>(round(a * 255.0f)); }
 
 		void Rf(const float r) { R(r); }
 		void Gf(const float g) { G(g); }
