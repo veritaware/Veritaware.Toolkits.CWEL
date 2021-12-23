@@ -1,7 +1,6 @@
-#include "stdafx.h"
 #include "color.h"
 
-namespace veritaware
+namespace vwr
 {
 	Color::Color(const Color & c)
 	{

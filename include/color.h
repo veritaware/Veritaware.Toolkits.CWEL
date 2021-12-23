@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <cmath>
 
-namespace veritaware
+namespace vwr
 {
 #define BYTE_ORDER_ARGB 0x00
 #define BYTE_ORDER_RGBA 0x01

@@ -2,15 +2,9 @@
 #define VERITAWARE_TOOLKITS_CWEL_STREAMING_
 #include <string>
 
-#ifdef VERITAWARETOOLKITSCWEL_EXPORTS
-#  define EXPORT __declspec(dllexport)
-#else
-#  define EXPORT __declspec(dllimport)
-#endif
-
 namespace veritaware
 {
-	struct EXPORT IToString //NOLINT
+	struct IToString //NOLINT
 	{
 		virtual ~IToString() = default;
 		virtual std::string ToString() const = 0;

@@ -3,7 +3,7 @@
 
 #include <vector>
 
-namespace veritaware
+namespace vwr
 {
 	template<typename T>
 	void AddRange(std::vector<T> &dst, const std::vector<T> &src);
