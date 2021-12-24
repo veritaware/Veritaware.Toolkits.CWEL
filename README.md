@@ -1,2 +1,3 @@
 # Veritaware.Toolkits.CWEL
-C++ Windows Extension Library provides basic C++ functionalities that make life easier for those who usually use .Net "System" libraries
+
+C++ Windows Extensions Library is a basic framework created to provide similar basic functionalities to those found in the .Net Framework.
