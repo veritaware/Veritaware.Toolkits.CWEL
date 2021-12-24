@@ -46,6 +46,11 @@ namespace vwr {
 		return static_cast<int32_t>(value) ^ static_cast<int32_t>(value >> 32);
 	}
 
+    int32_t GetHashCode(const size_t value)
+    {
+        return GetHashCode(static_cast<uint64_t>(value));
+    }
+
 	int32_t GetHashCode(float value)
 	{
 		if (value == 0)

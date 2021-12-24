@@ -5,11 +5,11 @@ int32_t vwr::Object::GetHashCode() const {
 }
 
 std::string vwr::Object::ToString() const {
-    return "vwr::Object";
+    return GetType().name();
 }
 
-std::string vwr::Object::GetType() const {
-    return "vwr::Object";
+const std::type_info& vwr::Object::GetType() const {
+    return typeid(*this);
 }
 
 bool vwr::Object::Equals(const vwr::IGetHashCode &obj) const {

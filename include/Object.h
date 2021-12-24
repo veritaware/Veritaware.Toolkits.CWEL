@@ -14,7 +14,7 @@ namespace vwr
         Object() = default;
         int32_t GetHashCode() const override;
         std::string ToString() const override;
-        virtual std::string GetType() const;
+        const std::type_info& GetType() const;
 
         bool Equals(const IGetHashCode &obj) const;
         static bool Equals(const IGetHashCode &obj1, const IGetHashCode &obj2);

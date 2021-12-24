@@ -24,7 +24,6 @@ namespace vwr
 
         int32_t GetHashCode() const override;
         std::string ToString() const override;
-        std::string GetType() const override;
 
 		uint8_t R() const { return _r; }
 		uint8_t G() const { return _g; }

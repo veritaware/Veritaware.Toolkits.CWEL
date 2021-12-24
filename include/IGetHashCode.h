@@ -13,6 +13,7 @@ namespace vwr
 	int32_t GetHashCode(uint32_t value);
 	int32_t GetHashCode(int64_t value);
 	int32_t GetHashCode(uint64_t value);
+    int32_t GetHashCode(size_t value);
 	int32_t GetHashCode(float value);
 	int32_t GetHashCode(double value);
 	int32_t GetHashCode(const char * value);
