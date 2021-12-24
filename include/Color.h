@@ -1,8 +1,10 @@
 #ifndef VERITAWARE_TOOLKITS_CWEL_COLOR_
 #define VERITAWARE_TOOLKITS_CWEL_COLOR_
 
-#include <cstdint>
 #include <cmath>
+#include <cstdint>
+
+#include "Object.h"
 
 namespace vwr
 {
@@ -11,7 +13,7 @@ namespace vwr
 #define BYTE_ORDER_ABGR 0x10
 #define BYTE_ORDER_BGRA 0x11
 
-	class Color
+	class Color : public Object
 	{
 	public:
 		Color() = default;
@@ -19,6 +21,10 @@ namespace vwr
 		Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 		Color(float r, float g, float b, float a);
 		explicit Color(uint32_t value, uint8_t byteOrder = BYTE_ORDER_ARGB);
+
+        int32_t GetHashCode() const override;
+        std::string ToString() const override;
+        std::string GetType() const override;
 
 		uint8_t R() const { return _r; }
 		uint8_t G() const { return _g; }

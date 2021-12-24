@@ -1,3 +1,4 @@
+#include <sstream>
 #include "Color.h"
 
 namespace vwr
@@ -45,6 +46,32 @@ namespace vwr
 			break;
 		}
 	}
+
+    int32_t Color::GetHashCode() const {
+        return CombineHashCodes(
+            vwr::GetHashCode(_b),
+            CombineHashCodes(
+                vwr::GetHashCode(_g),
+                CombineHashCodes(
+                    vwr::GetHashCode(_a),
+                    vwr::GetHashCode(_r)
+                )
+            )
+        );
+    }
+
+    std::string Color::ToString() const {
+        std::stringstream ss;
+        ss << "A: " << std::to_string(_a) << ", ";
+        ss << "R: " << std::to_string(_r) << ", ";
+        ss << "G: " << std::to_string(_g) << ", ";
+        ss << "B: " << std::to_string(_b);
+        return ss.str();
+    }
+
+    std::string Color::GetType() const {
+        return "vwr::Color";
+    }
 
 	uint32_t Color::ARGB() const
 	{

@@ -1,14 +1,14 @@
 #include "Object.h"
 
-int32_t vwr::Object::GetHashCode() {
+int32_t vwr::Object::GetHashCode() const {
     return 0;
 }
 
-std::string vwr::Object::ToString() {
+std::string vwr::Object::ToString() const {
     return "vwr::Object";
 }
 
-std::string vwr::Object::GetType() {
+std::string vwr::Object::GetType() const {
     return "vwr::Object";
 }
 
