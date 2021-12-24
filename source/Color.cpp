@@ -5,26 +5,26 @@ namespace vwr
 {
 	Color::Color(const Color & c)
 	{
-		_r = c.R();
-		_g = c.G();
-		_b = c.B();
-		_a = c.A();
+        _a = c._a;
+		_r = c._r;
+		_g = c._g;
+		_b = c._b;
 	}
 
-	Color::Color(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a)
+	Color::Color(const uint8_t a, const uint8_t r, const uint8_t g, const uint8_t b)
 	{
+        _a = a;
 		_r = r;
 		_g = g;
 		_b = b;
-		_a = a;
 	}
 
-	Color::Color(const float r, const float g, const float b, const float a)
+	Color::Color(const float a, const float r, const float g, const float b)
 	{
+        _a = static_cast<uint8_t>(Trunc(a) * 255);
 		_r = static_cast<uint8_t>(Trunc(r) * 255);
 		_g = static_cast<uint8_t>(Trunc(g) * 255);
 		_b = static_cast<uint8_t>(Trunc(b) * 255);
-		_a = static_cast<uint8_t>(Trunc(a) * 255);
 	}
 
 	Color::Color(const uint32_t value, const uint8_t byteOrder)
