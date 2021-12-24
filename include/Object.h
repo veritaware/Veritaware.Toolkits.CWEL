@@ -6,9 +6,18 @@
 
 namespace vwr
 {
-    class Object //NOLINT
+    class Object : //NOLINT
+        public IGetHashCode, 
+        public IToString 
     {
+    public:
+        Object() = default;
+        virtual int32_t GetHashCode();
+        virtual std::string ToString();
+        virtual std::string GetType();
 
+        bool Equals(const IGetHashCode &obj) const;
+        static bool Equals(const IGetHashCode &obj1, const IGetHashCode &obj2);
     };
 }
 

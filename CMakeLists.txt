@@ -5,22 +5,20 @@ include(CTest)
 enable_testing()
 
 add_library(${PROJECT_NAME}
-    source/Veritaware.Toolkits.CWEL.cpp
-    source/IGetHashCode.cpp
-    source/IToString.cpp
-    source/Color.cpp
-    source/VectorExtensions.cpp
-)
+        source/Veritaware.Toolkits.CWEL.cpp
+        source/IGetHashCode.cpp
+        source/IToString.cpp
+        source/Object.cpp
+        source/Color.cpp
+        source/VectorExtensions.cpp)
 
 target_include_directories(${PROJECT_NAME}
-    PUBLIC include
-    PUBLIC source
-)
+        PUBLIC include
+        PUBLIC source)
 
 target_compile_features(${PROJECT_NAME}
-    PUBLIC cxx_auto_type
-    PUBLIC cxx_defaulted_functions
-)
+        PUBLIC cxx_auto_type
+        PUBLIC cxx_defaulted_functions)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
