@@ -68,7 +68,7 @@ namespace vwr
 		auto g = static_cast<uint32_t>(_g);
 		auto b = static_cast<uint32_t>(_b);
 		auto a = static_cast<uint32_t>(_a);
-		return _a << 24 | _r << 16 | _g << 8 | _b;
+		return a << 24 | r << 16 | g << 8 | b;
 	}
 
 	uint32_t Color::RGBA() const
@@ -86,7 +86,7 @@ namespace vwr
 		auto g = static_cast<uint32_t>(_g);
 		auto b = static_cast<uint32_t>(_b);
 		auto a = static_cast<uint32_t>(_a);
-		return _a << 24 | _b << 16 | _g << 8 | _r;
+		return a << 24 | b << 16 | g << 8 | r;
 	}
 
 	uint32_t Color::BGRA() const
@@ -95,7 +95,7 @@ namespace vwr
 		auto g = static_cast<uint32_t>(_g);
 		auto b = static_cast<uint32_t>(_b);
 		auto a = static_cast<uint32_t>(_a);
-		return _b << 24 | _g << 16 | _r << 8 | _a;
+		return b << 24 | g << 16 | r << 8 | a;
 	}
 
 	void Color::ARGB(const uint32_t argb)
