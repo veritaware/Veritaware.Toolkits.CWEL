@@ -48,16 +48,12 @@ namespace vwr
 	}
 
     int32_t Color::GetHashCode() const {
-        return CombineHashCodes(
-            vwr::GetHashCode(_b),
-            CombineHashCodes(
-                vwr::GetHashCode(_g),
-                CombineHashCodes(
-                    vwr::GetHashCode(_a),
-                    vwr::GetHashCode(_r)
-                )
-            )
-        );
+        auto hashCode = vwr::GetHashCode(GetType());
+        hashCode = CombineHashCodes(hashCode, vwr::GetHashCode(_a));
+        hashCode = CombineHashCodes(hashCode, vwr::GetHashCode(_r));
+        hashCode = CombineHashCodes(hashCode, vwr::GetHashCode(_g));
+        hashCode = CombineHashCodes(hashCode, vwr::GetHashCode(_b));
+        return hashCode;
     }
 
     std::string Color::ToString() const {

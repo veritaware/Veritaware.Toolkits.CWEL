@@ -1,7 +1,7 @@
 #include "Object.h"
 
 int32_t vwr::Object::GetHashCode() const {
-    return 0;
+    return vwr::GetHashCode((int64_t)this);
 }
 
 std::string vwr::Object::ToString() const {
