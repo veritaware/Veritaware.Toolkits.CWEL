@@ -1,5 +1,5 @@
-#ifndef VERITAWARE_TOOLKITS_CWEL_HASHING_
-#define VERITAWARE_TOOLKITS_CWEL_HASHING_
+#ifndef VERITAWARE_TOOLKITS_CWEL_IGETHASHCODE_
+#define VERITAWARE_TOOLKITS_CWEL_IGETHASHCODE_
 #include <string>
 
 namespace vwr
@@ -19,24 +19,25 @@ namespace vwr
 	int32_t GetHashCode(const std::string & value);
 	int32_t CombineHashCodes(int32_t hash1, int32_t hash2);
 
-	struct IHashable //NOLINT
+	class IGetHashCode //NOLINT
 	{
-		virtual ~IHashable() = default;
+	public:
+		virtual ~IGetHashCode() = default;
 		virtual int32_t GetHashCode() const = 0;
 
-		friend bool operator==(const IHashable& h1, const IHashable& h2)
+		friend bool operator==(const IGetHashCode& h1, const IGetHashCode& h2)
 		{
 			return h1.GetHashCode() == h2.GetHashCode();
 		}
 
-		friend bool operator!=(const IHashable& h1, const IHashable& h2)
+		friend bool operator!=(const IGetHashCode& h1, const IGetHashCode& h2)
 		{
 			return h1.GetHashCode() != h2.GetHashCode();
 		}
 
 	protected:
-		IHashable() = default;
+		IGetHashCode() = default;
 	};
 }
 
-#endif  //VERITAWARE_TOOLKITS_CWEL_HASHING_
+#endif  //VERITAWARE_TOOLKITS_CWEL_IGETHASHCODE_

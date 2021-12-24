@@ -1,4 +1,4 @@
-#include "vector_ext.h"
+#include "VectorExtensions.h"
 
 namespace vwr
 {

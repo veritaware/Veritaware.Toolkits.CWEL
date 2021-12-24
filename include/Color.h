@@ -11,8 +11,9 @@ namespace vwr
 #define BYTE_ORDER_ABGR 0x10
 #define BYTE_ORDER_BGRA 0x11
 
-	struct Color
+	class Color
 	{
+	public:
 		Color() = default;
 		Color(const Color & c);
 		Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a);

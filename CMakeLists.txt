@@ -6,10 +6,10 @@ enable_testing()
 
 add_library(${PROJECT_NAME}
     source/Veritaware.Toolkits.CWEL.cpp
-    source/hashing.cpp
-    source/streaming.cpp
-    source/color.cpp
-    source/vector_ext.cpp
+    source/IGetHashCode.cpp
+    source/IToString.cpp
+    source/Color.cpp
+    source/VectorExtensions.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
