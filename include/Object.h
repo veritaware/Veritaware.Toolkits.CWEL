@@ -12,11 +12,11 @@ namespace vwr
     {
     public:
         Object() = default;
-        int32_t GetHashCode() const override;
-        std::string ToString() const override;
-        const std::type_info& GetType() const;
+        [[nodiscard]] int32_t GetHashCode() const override;
+        [[nodiscard]] std::string ToString() const override;
+        [[nodiscard]] const std::type_info& GetType() const;
 
-        bool Equals(const IGetHashCode &obj) const;
+        [[nodiscard]] bool Equals(const IGetHashCode &obj) const;
         static bool Equals(const IGetHashCode &obj1, const IGetHashCode &obj2);
     };
 }
