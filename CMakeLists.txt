@@ -5,16 +5,16 @@ include(CTest)
 enable_testing()
 
 add_library(${PROJECT_NAME}
-        source/Veritaware.Toolkits.CWEL.cpp
-        source/IGetHashCode.cpp
-        source/IToString.cpp
-        source/Object.cpp
-        source/Color.cpp
-        source/VectorExtensions.cpp)
+        src/Veritaware.Toolkits.CWEL.cpp
+        src/IGetHashCode.cpp
+        src/IToString.cpp
+        src/Object.cpp
+        src/Color.cpp
+        src/VectorExtensions.cpp)
 
 target_include_directories(${PROJECT_NAME}
         PUBLIC include
-        PUBLIC source)
+        PUBLIC src)
 
 target_compile_features(${PROJECT_NAME}
         PUBLIC cxx_auto_type
