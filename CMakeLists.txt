@@ -9,7 +9,7 @@ add_library(${PROJECT_NAME}
         src/IToString.cpp
         src/Object.cpp
         src/Color.cpp
-        src/VectorExtensions.cpp)
+        src/VectorExtensions.cpp src/Event.cpp include/Event.hpp)
 
 target_include_directories(${PROJECT_NAME}
         PUBLIC include)

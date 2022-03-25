@@ -1,5 +1,5 @@
 #include <sstream>
-#include "Color.h"
+#include "Color.hpp"
 
 namespace vwr
 {

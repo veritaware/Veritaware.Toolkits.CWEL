@@ -1,4 +1,4 @@
-#include "Object.h"
+#include "Object.hpp"
 
 int32_t vwr::Object::GetHashCode() const {
     return vwr::GetHashCode((int64_t)this);

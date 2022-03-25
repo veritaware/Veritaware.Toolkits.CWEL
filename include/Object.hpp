@@ -1,8 +1,8 @@
 #ifndef VERITAWARE_TOOLKITS_CWEL_OBJECT_
 #define VERITAWARE_TOOLKITS_CWEL_OBJECT_
 
-#include "IGetHashCode.h"
-#include "IToString.h"
+#include "IGetHashCode.hpp"
+#include "IToString.hpp"
 
 namespace vwr
 {

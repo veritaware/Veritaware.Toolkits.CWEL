@@ -4,7 +4,7 @@
 #include <cmath>
 #include <cstdint>
 
-#include "Object.h"
+#include "Object.hpp"
 
 namespace vwr
 {

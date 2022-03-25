@@ -1,4 +1,4 @@
-#include "IGetHashCode.h"
+#include "IGetHashCode.hpp"
 
 namespace vwr {
 	int32_t GetHashCode(const bool value)
