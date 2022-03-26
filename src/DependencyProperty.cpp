@@ -7,7 +7,7 @@ vwr::ChangedEventArgs<T>::ChangedEventArgs(T* oldValue, T* newValue){
 }
 
 template<class T>
-vwr::DependencyProperty<T>::DependencyProperty(T value) {
+vwr::DependencyProperty<T>::DependencyProperty(const T& value) {
     _oldValue = value;
     _value = value;
 
@@ -30,6 +30,18 @@ void vwr::DependencyProperty<T>::Set(const T& value) {
     if(changed){
         RaiseChanged();
     }
+}
+
+template<class T>
+vwr::DependencyProperty<T> &vwr::DependencyProperty<T>::operator=(const vwr::DependencyProperty<T> &other) {
+    Set(other.Get());
+    return *this;
+}
+
+template<class T>
+vwr::DependencyProperty<T> &vwr::DependencyProperty<T>::operator=(const T &value) {
+    Set(value);
+    return *this;
 }
 
 template<class T>

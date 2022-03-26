@@ -33,13 +33,16 @@ namespace vwr {
     class DependencyProperty {
     public:
         DependencyProperty() = default;
-        explicit DependencyProperty(T value);
+        explicit DependencyProperty(const T& value);
 
         const T& Get();
         void Set(const T& value);
 
         const T& operator()() { return Get(); }
         void operator()(const T& value) { Set(value); }
+
+        DependencyProperty<T>& operator=(const DependencyProperty<T>& other);
+        DependencyProperty<T>& operator=(const T& value);
 
         ChangedEventHandler<T> Changed;
 
