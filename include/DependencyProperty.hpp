@@ -6,9 +6,9 @@
 
 namespace vwr {
     template<class T>
-    class PropertyChangedEventArgs : public EventArgs {
+    class ChangedEventArgs : public EventArgs {
     public:
-        PropertyChangedEventArgs(T* oldValue, T* newValue);
+        ChangedEventArgs(T* oldValue, T* newValue);
 
         std::weak_ptr<T> OldValue() { return m_oldValue; }
         std::weak_ptr<T> NewValue() { return m_newValue; }
@@ -19,14 +19,14 @@ namespace vwr {
     };
 
     template<class T>
-    class PropertyChangedEventHandler : public EventHandler {
+    class ChangedEventHandler : public EventHandler {
     public:
-        void Invoke(Object* sender, PropertyChangedEventArgs<T>& e) { EventHandler::Invoke(sender, e); }
+        void Invoke(Object* sender, ChangedEventArgs<T>& e) { EventHandler::Invoke(sender, e); }
 
-        typedef void(*callback)(Object* sender, PropertyChangedEventArgs<T>& e);
+        typedef void(*callback)(Object* sender, ChangedEventArgs<T>& e);
 
-        PropertyChangedEventHandler& operator +=(callback delegate){ EventHandler::operator+=(delegate); }
-        PropertyChangedEventHandler& operator -=(callback delegate){ EventHandler::operator-=(delegate); }
+        ChangedEventHandler& operator +=(callback delegate){ EventHandler::operator+=(delegate); }
+        ChangedEventHandler& operator -=(callback delegate){ EventHandler::operator-=(delegate); }
     };
 
     template<class T>
@@ -41,13 +41,13 @@ namespace vwr {
         const T& operator()() { return Get(); }
         void operator()(const T& value) { Set(value); }
 
-        PropertyChangedEventHandler<T> PropertyChanged;
+        ChangedEventHandler<T> Changed;
 
     private:
         T _value;
         T _oldValue;
 
-        void RaisePropertyChanged();
+        void RaiseChanged();
     };
 
 #define prop DependencyProperty

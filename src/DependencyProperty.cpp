@@ -1,7 +1,7 @@
 #include "DependencyProperty.hpp"
 
 template<class T>
-vwr::PropertyChangedEventArgs<T>::PropertyChangedEventArgs(T* oldValue, T* newValue){
+vwr::ChangedEventArgs<T>::ChangedEventArgs(T* oldValue, T* newValue){
     m_oldValue = oldValue;
     m_newValue = newValue;
 }
@@ -11,7 +11,7 @@ vwr::DependencyProperty<T>::DependencyProperty(T value) {
     _oldValue = value;
     _value = value;
 
-    RaisePropertyChanged();
+    RaiseChanged();
 }
 
 template<class T>
@@ -28,12 +28,12 @@ void vwr::DependencyProperty<T>::Set(const T& value) {
     bool changed = obj ? obj->Equals((IGetHashCode)_value) : (value == _value);
 
     if(changed){
-        RaisePropertyChanged();
+        RaiseChanged();
     }
 }
 
 template<class T>
-void vwr::DependencyProperty<T>::RaisePropertyChanged() {
-    auto e = PropertyChangedEventArgs<T>(&_oldValue, &_value);
-    PropertyChanged.Invoke(this, e);
+void vwr::DependencyProperty<T>::RaiseChanged() {
+    auto e = ChangedEventArgs<T>(&_oldValue, &_value);
+    Changed.Invoke(this, e);
 }
