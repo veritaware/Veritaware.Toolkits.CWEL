@@ -7,7 +7,6 @@
 namespace vwr {
     class EventArgs : public Object {};
 
-    typedef void(*callback)(Object* sender, EventArgs& e);
 
     class EventHandler : public Object {
     public:
@@ -15,10 +14,12 @@ namespace vwr {
 
         void Invoke(Object* sender, EventArgs& e);
 
+        typedef void(*callback)(Object* sender, EventArgs& e);
+
         EventHandler& operator +=(callback delegate);
         EventHandler& operator -=(callback delegate);
 
-    private:
+    protected:
         EventHandler& operator =(const EventHandler& e) { return *this; }; // non-re-assignable!
         std::vector<callback> m_delegates{};
     };

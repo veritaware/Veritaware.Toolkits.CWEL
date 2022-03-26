@@ -1,19 +1,22 @@
 cmake_minimum_required(VERSION 3.14)
-project(Veritaware.Toolkits.CWEL)
+project(CWEL)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_library(${PROJECT_NAME}
+add_library(CWEL
         src/Veritaware.Toolkits.CWEL.cpp
         src/IGetHashCode.cpp
         src/IToString.cpp
         src/Object.cpp
         src/Color.cpp
-        src/VectorExtensions.cpp src/Event.cpp include/Event.hpp)
+        src/VectorExtensions.cpp
+        src/Event.cpp
+        src/DependencyProperty.cpp
+        )
 
-target_include_directories(${PROJECT_NAME}
-        PUBLIC include)
+target_include_directories(CWEL PUBLIC include)
 
-target_compile_features(${PROJECT_NAME}
+target_compile_features(CWEL
         PUBLIC cxx_auto_type
-        PUBLIC cxx_defaulted_functions)
+        PUBLIC cxx_defaulted_functions
+        )

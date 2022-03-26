@@ -8,12 +8,12 @@ void vwr::EventHandler::Invoke(vwr::Object *sender, vwr::EventArgs &e) {
     }
 }
 
-vwr::EventHandler &vwr::EventHandler::operator+=(vwr::callback delegate) {
+vwr::EventHandler &vwr::EventHandler::operator+=(callback delegate) {
     m_delegates.push_back(delegate);
     return *this;
 }
 
-vwr::EventHandler &vwr::EventHandler::operator-=(vwr::callback delegate) {
+vwr::EventHandler &vwr::EventHandler::operator-=(callback delegate) {
     auto d = std::find(m_delegates.begin(), m_delegates.end(), delegate);
 
     if(d != m_delegates.end())
