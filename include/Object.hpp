@@ -1,5 +1,5 @@
-#ifndef VERITAWARE_TOOLKITS_CWEL_OBJECT_
-#define VERITAWARE_TOOLKITS_CWEL_OBJECT_
+#ifndef VWRTK_CWEL_OBJECT_HPP
+#define VWRTK_CWEL_OBJECT_HPP
 
 #include "IGetHashCode.hpp"
 #include "IToString.hpp"
@@ -168,4 +168,4 @@ namespace vwr
     };
 }
 
-#endif  //VERITAWARE_TOOLKITS_CWEL_OBJECT_
+#endif  //VWRTK_CWEL_OBJECT_HPP
