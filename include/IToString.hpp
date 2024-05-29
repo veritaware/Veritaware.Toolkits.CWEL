@@ -1,5 +1,5 @@
-#ifndef VERITAWARE_TOOLKITS_CWEL_ITOSTRING_
-#define VERITAWARE_TOOLKITS_CWEL_ITOSTRING_
+#ifndef VWRTK_CWEL_I_TO_STRING_HPP
+#define VWRTK_CWEL_I_TO_STRING_HPP
 #include <string>
 
 namespace vwr
@@ -17,4 +17,4 @@ namespace vwr
 	};
 }
 
-#endif  //VERITAWARE_TOOLKITS_CWEL_ITOSTRING_
+#endif  //VWRTK_CWEL_I_TO_STRING_HPP
