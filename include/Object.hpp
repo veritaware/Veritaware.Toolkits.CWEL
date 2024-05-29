@@ -4,6 +4,8 @@
 #include "IGetHashCode.hpp"
 #include "IToString.hpp"
 
+#include <typeinfo>
+
 namespace vwr
 {
     class Object : //NOLINT

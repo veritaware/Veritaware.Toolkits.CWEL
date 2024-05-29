@@ -1,5 +1,7 @@
 #ifndef VWRTK_CWEL_I_TO_STRING_HPP
 #define VWRTK_CWEL_I_TO_STRING_HPP
+
+#include <sstream>
 #include <string>
 
 namespace vwr
