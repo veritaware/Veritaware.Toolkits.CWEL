@@ -1,7 +1,6 @@
 #ifndef VWRTK_CWEL_VECTOR_EXTENSIONS_HPP
 #define VWRTK_CWEL_VECTOR_EXTENSIONS_HPP
 
-#include <algorithm>
 #include <vector>
 
 namespace vwr
