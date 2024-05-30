@@ -1,5 +1,7 @@
 #include "VectorExtensions.hpp"
 
+#include <algorithm>
+
 namespace vwr
 {
 	template<typename T>
