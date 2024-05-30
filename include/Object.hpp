@@ -22,19 +22,43 @@ namespace vwr
         static bool Equals(const IGetHashCode &obj1, const IGetHashCode &obj2);
     };
 
+    class Boolean;
+    class SByte;
+    class Byte;
+    class Int16;
+    class UInt16;
+    class Int32;
+    class UInt32;
+    class Int64;
+    class UInt64;
+    class Single;
+    class Double;
+
     template <typename T>
     class ValueType : public Object
     {
     public:
         [[nodiscard]] T GetValue() const { return m_value; }
         void SetValue(T value) { m_value = value; }
-    protected:
+    private:
         ValueType() = default;
         explicit ValueType(T value) : m_value(value) {}
         T m_value;
+
+        friend class Boolean;
+        friend class SByte;
+        friend class Byte;
+        friend class Int16;
+        friend class UInt16;
+        friend class Int32;
+        friend class UInt32;
+        friend class Int64;
+        friend class UInt64;
+        friend class Single;
+        friend class Double;
     };
 
-    class Boolean : public ValueType<bool>
+    class Boolean final : public ValueType<bool>
     {
     public:
         Boolean() : ValueType(false) {}
@@ -45,7 +69,7 @@ namespace vwr
         }
     };
 
-    class SByte : public ValueType<int8_t>
+    class SByte final : public ValueType<int8_t>
     {
     public:
         SByte() : ValueType(0) {}
@@ -57,7 +81,7 @@ namespace vwr
         }
     };
 
-    class Byte : public ValueType<uint8_t>
+    class Byte final : public ValueType<uint8_t>
     {
     public:
         Byte() : ValueType(0) {}
@@ -68,7 +92,7 @@ namespace vwr
         }
     };
 
-    class Int16 : public ValueType<int16_t>
+    class Int16 final : public ValueType<int16_t>
     {
     public:
         Int16() : ValueType(0) {}
@@ -80,7 +104,7 @@ namespace vwr
         }
     };
 
-    class UInt16 : public ValueType<uint16_t>
+    class UInt16 final : public ValueType<uint16_t>
     {
     public:
         UInt16() : ValueType(0) {}
@@ -91,7 +115,7 @@ namespace vwr
         }
     };
 
-    class Int32 : public ValueType<int32_t>
+    class Int32 final : public ValueType<int32_t>
     {
     public:
         Int32() : ValueType(0) {}
@@ -102,7 +126,7 @@ namespace vwr
         }
     };
 
-    class UInt32 : public ValueType<uint32_t>
+    class UInt32 final : public ValueType<uint32_t>
     {
     public:
         UInt32() : ValueType(0) {}
@@ -113,7 +137,7 @@ namespace vwr
         }
     };
 
-    class Int64 : public ValueType<int64_t>
+    class Int64 final : public ValueType<int64_t>
     {
     public:
         Int64() : ValueType(0) {}
@@ -125,7 +149,7 @@ namespace vwr
         }
     };
 
-    class UInt64 : public ValueType<uint64_t>
+    class UInt64 final : public ValueType<uint64_t>
     {
     public:
         UInt64() : ValueType(0) {}
@@ -137,7 +161,7 @@ namespace vwr
         }
     };
 
-    class Single : public ValueType<float>
+    class Single final : public ValueType<float>
     {
     public:
         Single() : ValueType(0.0f) {}
@@ -152,7 +176,7 @@ namespace vwr
 
     };
 
-    class Double : public ValueType<double>
+    class Double final : public ValueType<double>
     {
     public:
         Double() : ValueType(0.0) {}
