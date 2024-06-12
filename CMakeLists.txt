@@ -9,6 +9,7 @@ add_library(CWEL
         src/IToString.cpp
         src/Object.cpp
         src/Extensions/Vector.cpp
+        src/System/Command.cpp
         )
 
 target_include_directories(CWEL PUBLIC include)
