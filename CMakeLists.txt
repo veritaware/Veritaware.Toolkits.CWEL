@@ -8,7 +8,7 @@ add_library(CWEL
         src/IGetHashCode.cpp
         src/IToString.cpp
         src/Object.cpp
-        src/VectorExtensions.cpp
+        src/Extensions/Vector.cpp
         )
 
 target_include_directories(CWEL PUBLIC include)

@@ -1,5 +1,5 @@
-#ifndef VWRTK_CWEL_VECTOR_EXTENSIONS_HPP
-#define VWRTK_CWEL_VECTOR_EXTENSIONS_HPP
+#ifndef VWRTK_CWEL_EXTENSIONS_VECTOR_HPP
+#define VWRTK_CWEL_EXTENSIONS_VECTOR_HPP
 
 #include <vector>
 
@@ -12,4 +12,4 @@ namespace vwr
 	void Reverse(std::vector<T> &v);
 }
 
-#endif //VWRTK_CWEL_VECTOR_EXTENSIONS_HPP
+#endif //VWRTK_CWEL_EXTENSIONS_VECTOR_HPP
