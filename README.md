@@ -4,5 +4,5 @@
 ![MIT license](https://img.shields.io/badge/license-MIT-green)
 
 C++ Wholesome Extensions Library is a framework created to provide a set
-of useful classes, wrappers and functions and extensions for C++ developers,
+of useful classes, wrappers, functions and extensions for C++ developers,
 similar to the functionalities found out of the box in other OOP languages.
