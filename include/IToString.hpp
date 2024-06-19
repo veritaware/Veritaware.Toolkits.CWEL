@@ -6,17 +6,17 @@
 
 namespace vwr
 {
-	class IToString //NOLINT
-	{
-	public:
-		virtual ~IToString() = default;
-		virtual std::string ToString() const = 0;
+    class IToString //NOLINT
+    {
+    public:
+        virtual ~IToString() = default;
+        virtual std::string ToString() const = 0;
 
-		friend std::ostream& operator<< (std::ostream& stream, const IToString& iToString);
+        friend std::ostream& operator<< (std::ostream& stream, const IToString& iToString);
 
-	protected:
-		IToString() = default;
-	};
+    protected:
+        IToString() = default;
+    };
 }
 
 #endif  //VWRTK_CWEL_I_TO_STRING_HPP

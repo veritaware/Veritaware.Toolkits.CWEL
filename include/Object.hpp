@@ -4,6 +4,7 @@
 #include "IGetHashCode.hpp"
 #include "IToString.hpp"
 
+#include <concepts>
 #include <typeinfo>
 
 namespace vwr
