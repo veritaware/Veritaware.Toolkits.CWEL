@@ -11,7 +11,8 @@ add_library(CWEL
         src/Extensions/Vector.cpp
         src/System/Command.cpp
         src/Event.cpp
-        )
+        src/Property.cpp
+)
 
 target_include_directories(CWEL PUBLIC include)
 
