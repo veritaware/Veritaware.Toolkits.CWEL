@@ -5,13 +5,13 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_library(CWEL
         src/Veritaware.Toolkits.CWEL.cpp
+        src/Event.cpp
         src/IGetHashCode.cpp
         src/IToString.cpp
         src/Object.cpp
+        src/Property.cpp
         src/Extensions/Vector.cpp
         src/System/Command.cpp
-        src/Event.cpp
-        src/Property.cpp
 )
 
 target_include_directories(CWEL PUBLIC include)
