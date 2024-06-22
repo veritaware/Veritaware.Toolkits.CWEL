@@ -6,6 +6,9 @@
 
 namespace vwr
 {
+    /// <summary>
+    /// Provides data for the ValueChanged event.
+    /// </summary>
     class ValueChangedEventArgs : public EventArgs
     {
         public:
@@ -14,7 +17,13 @@ namespace vwr
             : m_oldValue(oldValue), m_newValue(newValue) {}
         virtual ~ValueChangedEventArgs() = default;
 
+        /// <summary>
+        /// Gets the old value of the property.
+        /// </summary>
         Object GetOldValue() const { return m_oldValue; }
+        /// <summary>
+        /// Gets the new value of the property.
+        /// </summary>
         Object GetNewValue() const { return m_newValue; }
 
         protected:
@@ -29,6 +38,9 @@ namespace vwr
         virtual ~ValueChangedEvent() = default;
     };
 
+    /// <summary>
+    /// Represents a property that can be observed for changes.
+    /// </summary>
     template<std::derived_from<Object> T>
     class Property : Object
     {
@@ -45,6 +57,9 @@ namespace vwr
         void operator<<(const T& value) { SetValue(value); }
         void operator>>(T& value) { value = GetValue(); }
 
+        /// <summary>
+        /// Occurs when the value of the property changes.
+        /// </summary>
         ValueChangedEvent ValueChanged;
 
         protected:

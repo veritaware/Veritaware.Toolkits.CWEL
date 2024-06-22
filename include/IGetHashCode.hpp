@@ -13,8 +13,11 @@ namespace vwr
     class IGetHashCode //NOLINT
     {
     public:
+        /// <summary>
+        /// Serves as the default hashing function.
+        /// </summary>
+        [[nodiscard]] virtual int32_t GetHashCode() const = 0;
         virtual ~IGetHashCode() = default;
-        virtual int32_t GetHashCode() const = 0;
 
         friend bool operator==(const IGetHashCode& h1, const IGetHashCode& h2)
         {

@@ -6,6 +6,9 @@
 
 namespace vwr
 {
+    /// <summary>
+    /// Interface for objects that can be represented as a string.
+    /// </summary>
     class IToString //NOLINT
     {
     public:

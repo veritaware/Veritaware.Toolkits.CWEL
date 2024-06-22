@@ -9,6 +9,9 @@
 
 namespace vwr
 {
+    /// <summary>
+    /// Serves as the base class for all Veritaware Toolkit classes.
+    /// </summary>
     class Object : //NOLINT
         public IGetHashCode, 
         public IToString 
@@ -16,12 +19,27 @@ namespace vwr
     public:
         Object() = default;
         [[nodiscard]] int32_t GetHashCode() const override;
+        /// <summary>
+        /// Returns a string that represents the current object.
+        /// </summary>
         [[nodiscard]] std::string ToString() const override;
+        /// <summary>
+        /// Returns the type of current instance.
+        /// </summary>
         [[nodiscard]] const std::type_info& GetType() const;
+        /// <summary>
+        /// Returns a string representing the name of the current type.
+        /// </summary>
         [[nodiscard]] std::string GetTypeName() const;
 
+        /// <summary>
+        /// Determines whether the given object is equal to the current object.
+        /// </summary>
         [[nodiscard]] bool Equals(const IGetHashCode &obj) const;
-        static bool Equals(const IGetHashCode &obj1, const IGetHashCode &obj2);
+        /// <summary>
+        /// Determines whether two given object instances are equal.
+        /// </summary>
+        [[nodiscard]] static bool Equals(const IGetHashCode &obj1, const IGetHashCode &obj2);
     };
 
     class Boolean;
@@ -36,6 +54,9 @@ namespace vwr
     class Single;
     class Double;
 
+    /// <summary>
+    /// Provides OOP wrapper for integral and floating-point types.
+    /// </summary>
     template <typename T>
     class ValueType : public Object
     {

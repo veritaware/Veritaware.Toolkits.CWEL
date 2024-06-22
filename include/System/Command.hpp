@@ -5,6 +5,9 @@
 
 namespace vwr::System::Command
 {
+    /// <summary>
+    /// Executes a command and returns the output.
+    /// </summary>
     std::string Execute(const char* cmd);
 }
 
