@@ -30,7 +30,7 @@ namespace vwr
         /// <summary>
         /// Represents the method that handles an event.
         /// </summary>
-        using delegate = void(*)(Object*, TEventArgs*);
+        using delegate = void(*)(Object* sender, TEventArgs* e);
     public:
         explicit Event(const Object& parent);
         /// <summary>
