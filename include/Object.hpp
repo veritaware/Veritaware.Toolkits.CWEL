@@ -63,6 +63,7 @@ namespace vwr
     public:
         [[nodiscard]] T GetValue() const { return m_value; }
         void SetValue(T value) { m_value = value; }
+        virtual std::string ToString() const { return std::to_string(m_value); }
     private:
         ValueType() = default;
         explicit ValueType(T value) : m_value(value) {}
@@ -89,6 +90,10 @@ namespace vwr
         int32_t GetHashCode() const override
         {
             return m_value ? 1 : 0;
+        }
+        std::string ToString() const override
+        {
+            return m_value ? "True" : "False";
         }
     };
 
