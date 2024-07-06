@@ -52,6 +52,8 @@ namespace vwr
         T GetValue() const { return m_value; }
         void SetValue(const T& value);
 
+        std::string ToString() const override { return m_value.ToString(); }
+
         void operator=(const T& value) { SetValue(value); }
         T operator()() const { return GetValue(); }
         void operator<<(const T& value) { SetValue(value); }
