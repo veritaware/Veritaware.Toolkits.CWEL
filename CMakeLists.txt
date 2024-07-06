@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 add_library(CWEL
         src/Veritaware.Toolkits.CWEL.cpp
         src/Event.cpp
+        src/IComparable.cpp
         src/IGetHashCode.cpp
         src/IToString.cpp
         src/Object.cpp
