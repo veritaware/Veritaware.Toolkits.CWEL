@@ -11,6 +11,7 @@ add_library(CWEL
         src/IToString.cpp
         src/Object.cpp
         src/Property.cpp
+        src/TimeSpan.cpp
         src/Extensions/Vector.cpp
         src/System/Command.cpp
 )
