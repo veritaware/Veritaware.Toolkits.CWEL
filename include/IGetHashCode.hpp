@@ -1,6 +1,7 @@
 #ifndef VWRTK_CWEL_I_GET_HASHCODE_HPP
 #define VWRTK_CWEL_I_GET_HASHCODE_HPP
 
+#include <cstdint>
 #include <string>
 
 namespace vwr
