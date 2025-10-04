@@ -13,7 +13,7 @@ namespace vwr
     {
     public:
         virtual ~IToString() = default;
-        virtual std::string ToString() const = 0;
+        [[nodiscard]] virtual std::string ToString() const = 0;
 
         friend std::ostream& operator<< (std::ostream& stream, const IToString& iToString);
 

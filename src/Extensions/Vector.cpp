@@ -5,38 +5,38 @@
 namespace vwr
 {
     template<typename T>
-    void vwr::vector<T>::AddRange(const std::vector<T> &src)
+    void vector<T>::AddRange(const std::vector<T> &src)
     {
         AddRange(*this, src);
     }
 
     template<typename T>
-    void vwr::vector<T>::AddRange(std::vector<T> &dst, const std::vector<T> &src)
+    void vector<T>::AddRange(std::vector<T> &dst, const std::vector<T> &src)
     {
         dst.insert(dst.end(), src.begin(), src.end());
     }
 
     template<typename T>
-    void vwr::vector<T>::Reverse()
+    void vector<T>::Reverse()
     {
         Reverse(*this);
     }
 
     template<typename T>
-    void vwr::vector<T>::Reverse(std::vector<T> &v)
+    void vector<T>::Reverse(std::vector<T> &vec)
     {
-        std::reverse(v.begin(), v.end());
+        std::reverse(vec.begin(), vec.end());
     }
 
     template<typename T>
-    void vwr::vector<T>::Remove(const T &value)
+    void vector<T>::Remove(const T &value)
     {
         Remove(*this, value);
     }
 
     template<typename T>
-    void vwr::vector<T>::Remove(std::vector<T> &v, const T &value)
+    void vector<T>::Remove(std::vector<T> &vec, const T &value)
     {
-        v.erase(std::remove(v.begin(), v.end(), value), v.end());
+        vec.erase(std::remove(vec.begin(), vec.end(), value), vec.end());
     }
 }

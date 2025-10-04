@@ -27,7 +27,7 @@ namespace vwr
         /// <summary>
         /// Reverses the order of all the elements in the Vector.
         /// </summary>
-        static void Reverse(std::vector<T> &v);
+        static void Reverse(std::vector<T> &vec);
 
         /// <summary>
         /// Removes the first occurrence of a specific object from the Vector.
@@ -37,7 +37,7 @@ namespace vwr
         /// <summary>
         /// Removes the first occurrence of a specific object from the Vector.
         /// </summary>
-        static void Remove(std::vector<T> &v, const T &value);
+        static void Remove(std::vector<T> &vec, const T &value);
     };
 }
 

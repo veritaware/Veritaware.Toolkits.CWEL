@@ -1,6 +1,8 @@
 #ifndef VWRTK_CWEL_PROPERTY_HPP
 #define VWRTK_CWEL_PROPERTY_HPP
 
+#include <utility>
+
 #include "Object.hpp"
 #include "Event.hpp"
 
@@ -11,31 +13,31 @@ namespace vwr
     /// </summary>
     class ValueChangedEventArgs : public EventArgs
     {
-        public:
+    public:
         ValueChangedEventArgs() = default;
-        explicit ValueChangedEventArgs(const Object& oldValue, const Object& newValue)
-            : m_oldValue(oldValue), m_newValue(newValue) {}
-        virtual ~ValueChangedEventArgs() = default;
+        explicit ValueChangedEventArgs(Object oldValue, Object newValue)
+            : m_oldValue(std::move(oldValue)), m_newValue(std::move(newValue)) {}
+        ~ValueChangedEventArgs() override = default;
 
         /// <summary>
         /// Gets the old value of the property.
         /// </summary>
-        Object GetOldValue() const { return m_oldValue; }
+        [[nodiscard]] Object GetOldValue() const { return m_oldValue; }
         /// <summary>
         /// Gets the new value of the property.
         /// </summary>
-        Object GetNewValue() const { return m_newValue; }
+        [[nodiscard]] Object GetNewValue() const { return m_newValue; }
 
-        protected:
+    private:
         Object m_oldValue;
         Object m_newValue;
     };
 
     class ValueChangedEvent : public Event<ValueChangedEventArgs>
     {
-        public:
+    public:
         explicit ValueChangedEvent(const Object& parent) : Event(parent) {}
-        virtual ~ValueChangedEvent() = default;
+        ~ValueChangedEvent() override = default;
     };
 
     /// <summary>
@@ -44,17 +46,17 @@ namespace vwr
     template<std::derived_from<Object> T>
     class Property : Object
     {
-        public:
-        Property();
-        explicit Property(const T& value) : m_value(value) {}
-        virtual ~Property() = default;
+    public:
+        Property() : ValueChanged(this), m_value() { }
+        explicit Property(const T& value) : ValueChanged(this), m_value(value) { }
+        ~Property() override = default;
 
         T GetValue() const { return m_value; }
         void SetValue(const T& value);
 
-        std::string ToString() const override { return m_value.ToString(); }
+        [[nodiscard]] std::string ToString() const override { return m_value.ToString(); }
 
-        void operator=(const T& value) { SetValue(value); }
+        Property& operator=(const T& value) { SetValue(value); return *this; }
         T operator()() const { return GetValue(); }
         void operator<<(const T& value) { SetValue(value); }
         void operator>>(T& value) { value = GetValue(); }
@@ -62,9 +64,9 @@ namespace vwr
         /// <summary>
         /// Occurs when the value of the property changes.
         /// </summary>
-        ValueChangedEvent ValueChanged;
+        ValueChangedEvent ValueChanged; // NOLINT(*-non-private-member-variables-in-classes)
 
-        protected:
+    private:
         T m_value;
     };
 }

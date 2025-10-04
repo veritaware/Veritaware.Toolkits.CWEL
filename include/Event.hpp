@@ -2,7 +2,7 @@
 #define VWRTK_CWEL_EVENT_HPP
 
 #include "Object.hpp"
-#include <vector>
+#include "Extensions/Vector.hpp"
 
 namespace vwr
 {
@@ -13,7 +13,7 @@ namespace vwr
     class EventArgs : public Object
     {
     public:
-        virtual ~EventArgs() = default;
+        ~EventArgs() override = default;
         static EventArgs Empty;
 
     protected:
@@ -30,7 +30,7 @@ namespace vwr
         /// <summary>
         /// Represents the method that handles an event.
         /// </summary>
-        using delegate = void(*)(Object* sender, TEventArgs* e);
+        using delegate = void(*)(Object* sender, TEventArgs* e); // NOLINT(*-identifier-length)
     public:
         explicit Event(const Object& parent);
         /// <summary>
@@ -44,11 +44,11 @@ namespace vwr
         /// <summary>
         /// Invokes event callbacks. Can be performed by the event's parent object only.
         /// </summary>
-        void Invoke(Object* sender, TEventArgs* e);
+        void Invoke(Object* sender, TEventArgs* e); // NOLINT(*-identifier-length)
 
-    protected:
+    private:
         const Object* m_parent;
-        std::vector<delegate> m_handlers;
+        vector<delegate> m_handlers;
     };
 }
 

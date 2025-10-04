@@ -4,6 +4,7 @@
 #include "IGetHashCode.hpp"
 #include "IToString.hpp"
 
+// ReSharper disable once CppUnusedIncludeDirective
 #include <concepts>
 #include <typeinfo>
 
@@ -63,7 +64,7 @@ namespace vwr
     public:
         [[nodiscard]] T GetValue() const { return m_value; }
         void SetValue(T value) { m_value = value; }
-        virtual std::string ToString() const { return std::to_string(m_value); }
+        [[nodiscard]] std::string ToString() const override { return std::to_string(m_value); }
     private:
         ValueType() = default;
         explicit ValueType(T value) : m_value(value) {}
@@ -86,12 +87,12 @@ namespace vwr
     {
     public:
         Boolean() : ValueType(false) {}
-        explicit Boolean(bool value) : ValueType(value) {}
-        int32_t GetHashCode() const override
+        explicit Boolean(const bool value) : ValueType(value) {}
+        [[nodiscard]] int32_t GetHashCode() const override
         {
             return m_value ? 1 : 0;
         }
-        std::string ToString() const override
+        [[nodiscard]] std::string ToString() const override
         {
             return m_value ? "True" : "False";
         }
@@ -101,20 +102,22 @@ namespace vwr
     {
     public:
         SByte() : ValueType(0) {}
-        explicit SByte(int8_t value) : ValueType(value) {}
-        int32_t GetHashCode() const override
+        explicit SByte(const int8_t value) : ValueType(value) {}
+        [[nodiscard]] int32_t GetHashCode() const override
         {
             return static_cast<int32_t>(m_value)
-                 | static_cast<int32_t>(m_value) << 16;
+                 | static_cast<int32_t>(m_value) << ShortShift;
         }
+    private:
+        static constexpr int8_t ShortShift = 16;
     };
 
     class Byte final : public ValueType<uint8_t>
     {
     public:
         Byte() : ValueType(0) {}
-        explicit Byte(uint8_t value) : ValueType(value) {}
-        int32_t GetHashCode() const override
+        explicit Byte(const uint8_t value) : ValueType(value) {}
+        [[nodiscard]] int32_t GetHashCode() const override
         {
             return m_value;
         }
@@ -124,22 +127,24 @@ namespace vwr
     {
     public:
         Int16() : ValueType(0) {}
-        explicit Int16(int16_t value) : ValueType(value) {}
-        int32_t GetHashCode() const override
+        explicit Int16(const int16_t value) : ValueType(value) {}
+        [[nodiscard]] int32_t GetHashCode() const override
         {
-            return (static_cast<int32_t>(m_value) << 16)
+            return (static_cast<int32_t>(m_value) << ShortShift)
                  | static_cast<uint16_t>(m_value);
         }
+    private:
+        static constexpr int8_t ShortShift = 16;
     };
 
     class UInt16 final : public ValueType<uint16_t>
     {
     public:
         UInt16() : ValueType(0) {}
-        explicit UInt16(uint16_t value) : ValueType(value) {}
-        int32_t GetHashCode() const override
+        explicit UInt16(const uint16_t value) : ValueType(value) {}
+        [[nodiscard]] int32_t GetHashCode() const override
         {
-            return static_cast<int32_t>(m_value);
+            return m_value;
         }
     };
 
@@ -147,8 +152,8 @@ namespace vwr
     {
     public:
         Int32() : ValueType(0) {}
-        explicit Int32(int32_t value) : ValueType(value) {}
-        int32_t GetHashCode() const override
+        explicit Int32(const int32_t value) : ValueType(value) {}
+        [[nodiscard]] int32_t GetHashCode() const override
         {
             return m_value;
         }
@@ -158,8 +163,8 @@ namespace vwr
     {
     public:
         UInt32() : ValueType(0) {}
-        explicit UInt32(uint32_t value) : ValueType(value) {}
-        int32_t GetHashCode() const override
+        explicit UInt32(const uint32_t value) : ValueType(value) {}
+        [[nodiscard]] int32_t GetHashCode() const override
         {
             return static_cast<int32_t>(m_value);
         }
@@ -169,35 +174,41 @@ namespace vwr
     {
     public:
         Int64() : ValueType(0) {}
-        explicit Int64(int64_t value) : ValueType(value) {}
-        int32_t GetHashCode() const override
+        explicit Int64(const int64_t value) : ValueType(value) {}
+        [[nodiscard]] int32_t GetHashCode() const override
         {
             return static_cast<int32_t>(m_value)
-                 ^ static_cast<int32_t>(m_value >> 32);
+                 ^ static_cast<int32_t>(m_value >> LongShift);
         }
+    private:
+        static constexpr int8_t LongShift = 32;
     };
 
     class UInt64 final : public ValueType<uint64_t>
     {
     public:
         UInt64() : ValueType(0) {}
-        explicit UInt64(uint64_t value) : ValueType(value) {}
-        int32_t GetHashCode() const override
+        explicit UInt64(const uint64_t value) : ValueType(value) {}
+        [[nodiscard]] int32_t GetHashCode() const override
         {
             return static_cast<int32_t>(m_value)
-                 ^ static_cast<int32_t>(m_value >> 32);
+                 ^ static_cast<int32_t>(m_value >> LongShift);
         }
+    private:
+        static constexpr int8_t LongShift = 32;
     };
 
     class Single final : public ValueType<float>
     {
     public:
-        Single() : ValueType(0.0f) {}
-        explicit Single(float value) : ValueType(value) {}
-        int32_t GetHashCode() const override
+        Single() : ValueType(0.0F) {}
+        explicit Single(const float value) : ValueType(value) {}
+        [[nodiscard]] int32_t GetHashCode() const override
         {
-            if (m_value == 0.0f)
+            if (m_value == 0.0F)
+            {
                 return 0;
+            }
 
             return *reinterpret_cast<const int32_t*>(&m_value);
         }
@@ -208,17 +219,20 @@ namespace vwr
     {
     public:
         Double() : ValueType(0.0) {}
-        explicit Double(double value) : ValueType(value) {}
-        int32_t GetHashCode() const override
+        explicit Double(const double value) : ValueType(value) {}
+        [[nodiscard]] int32_t GetHashCode() const override
         {
             if (m_value == 0.0)
+            {
                 return 0;
+            }
 
-            int64_t value = *reinterpret_cast<const int64_t*>(&m_value);
+            int64_t const value = *reinterpret_cast<const int64_t*>(&m_value);
             return static_cast<int32_t>(value)
-                 ^ static_cast<int32_t>(value >> 32);
+                 ^ static_cast<int32_t>(value >> LongShift);
         }
-
+    private:
+        static constexpr int8_t LongShift = 32;
     };
 }
 

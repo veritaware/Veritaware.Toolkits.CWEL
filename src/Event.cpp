@@ -1,5 +1,4 @@
 #include "Event.hpp"
-#include "Extensions/Vector.hpp"
 
 namespace vwr
 {
@@ -15,16 +14,20 @@ namespace vwr
 
     TMPL void EVENT_T::operator-=(EVENT_T::delegate handler)
     {
-        Remove(m_handlers, handler);
+        m_handlers.Remove(handler);
     }
 
-    TMPL void EVENT_T::Invoke(Object* sender, TEventArgs* e)
+    TMPL void EVENT_T::Invoke(Object* sender, TEventArgs* e) // NOLINT(*-identifier-length)
     {
         if (sender == nullptr)
+        {
             throw std::invalid_argument("Sender cannot be null.");
+        }
 
         if (m_parent != sender)
+        {
             throw std::invalid_argument("Sender is not the parent object of this event.");
+        }
 
         for (auto handler : m_handlers)
         {

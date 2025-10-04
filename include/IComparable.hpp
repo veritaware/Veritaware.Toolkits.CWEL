@@ -9,12 +9,12 @@ namespace vwr
     {
     public:
         virtual ~IComparable() = default;
-        virtual int CompareTo(const Object& obj) = 0;
+        [[nodiscard]] virtual int8_t CompareTo(const Object& obj) const = 0;
 
-        bool operator<(const Object& obj){ return CompareTo(obj) < 0; }
-        bool operator>(const Object& obj){ return CompareTo(obj) > 0; }
-        bool operator<=(const Object& obj){ return CompareTo(obj) <= 0; }
-        bool operator>=(const Object& obj){ return CompareTo(obj) >= 0; }
+        bool operator<(const Object& obj) const{ return CompareTo(obj) < 0; }
+        bool operator>(const Object& obj) const{ return CompareTo(obj) > 0; }
+        bool operator<=(const Object& obj) const{ return CompareTo(obj) <= 0; }
+        bool operator>=(const Object& obj) const{ return CompareTo(obj) >= 0; }
 
     protected:
         IComparable() = default;
@@ -25,7 +25,7 @@ namespace vwr
     {
     public:
         virtual ~IComparableT() = default;
-        virtual int CompareTo(const T& other) = 0;
+        virtual int8_t CompareTo(const T& other) const = 0;
 
         bool operator<(const T& other){ return CompareTo(other) < 0; }
         bool operator>(const T& other){ return CompareTo(other) > 0; }

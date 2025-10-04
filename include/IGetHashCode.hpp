@@ -19,12 +19,12 @@ namespace vwr
         [[nodiscard]] virtual int32_t GetHashCode() const = 0;
         virtual ~IGetHashCode() = default;
 
-        friend bool operator==(const IGetHashCode& h1, const IGetHashCode& h2)
+        friend bool operator==(const IGetHashCode& h1, const IGetHashCode& h2) // NOLINT(*-identifier-length)
         {
             return h1.GetHashCode() == h2.GetHashCode();
         }
 
-        friend bool operator!=(const IGetHashCode& h1, const IGetHashCode& h2)
+        friend bool operator!=(const IGetHashCode& h1, const IGetHashCode& h2) // NOLINT(*-identifier-length)
         {
             return h1.GetHashCode() != h2.GetHashCode();
         }
