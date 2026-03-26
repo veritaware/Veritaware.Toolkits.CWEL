@@ -6,11 +6,14 @@
 #ifndef CWEL_QUERY_HPP_
 #define CWEL_QUERY_HPP_
 
+#include <algorithm>
+#include <cstddef>
 #include <initializer_list>
 #include <numeric>
 #include <stdexcept>
 #include <type_traits>
 #include <typeinfo>
+#include <utility>
 #include <vector>
 
 namespace vwr
@@ -29,13 +32,29 @@ public:
     std::vector<T> get() const { return m_data; }
 
 #pragma region single element queries
+    /// Aggregates the elements of the collection using the specified binary predicate
+    /// and the provided seed as the initial accumulator.
+    template <typename Predicate>
+    T aggregate(T seed, Predicate&& predicate) const
+    {
+        T result = seed;
+        for(const auto& value : m_data)
+            result = predicate(result, value);
+        return result;
+    }
+
     /// Aggregates the elements of the collection using the specified binary predicate.
+    /// Uses the first element as the initial accumulator and throws if the sequence is empty.
     template <typename Predicate>
     T aggregate(Predicate&& predicate) const
     {
-        T result{};
-        for(const auto& value : m_data)
-            result = predicate(result, value);
+        if(m_data.empty())
+            throw std::out_of_range("Query is empty.");
+        auto it = m_data.begin();
+        T result = *it;
+        ++it;
+        for(; it != m_data.end(); ++it)
+            result = predicate(result, *it);
         return result;
     }
 
@@ -118,13 +137,12 @@ public:
     template <typename U>
     query<U> cast() const
     {
+        static_assert(std::is_constructible_v<T, U>, "Target type U must be constructible from source type T.");
         std::vector<U> result;
+        result.reserve(m_data.size());
         for(const auto& value : m_data)
         {
-            if constexpr(std::is_convertible_v<T, U>)
-                result.push_back(static_cast<U>(value));
-            else
-                throw std::bad_cast();
+            result.push_back(static_cast<U>(value));
         }
         return query<U>(std::move(result));
     }
@@ -172,18 +190,21 @@ public:
     }
 
     /// Produces the set difference of two sequences by using the default equality comparer to compare values.
+    /// The result contains only unique elements.
     query except(const query& other) const
     {
         std::vector<T> result;
         for(const auto& value : m_data)
         {
-            if(std::find(other.m_data.begin(), other.m_data.end(), value) == other.m_data.end())
+            if(std::find(other.m_data.begin(), other.m_data.end(), value) == other.m_data.end() &&
+               std::find(result.begin(), result.end(), value) == result.end())
                 result.push_back(value);
         }
         return query(std::move(result));
     }
 
     /// Produces the set difference of two sequences by using the specified equality comparer to compare values.
+    /// The result contains only unique elements according to the comparer.
     template <typename EqualityComparer>
     query except(const query& other, EqualityComparer&& comparer) const
     {
@@ -199,55 +220,84 @@ public:
                     break;
                 }
             }
-            if(!is_in_other)
+            bool is_duplicate = false;
+            for(const auto& existing : result)
+            {
+                if(comparer(value, existing))
+                {
+                    is_duplicate = true;
+                    break;
+                }
+            }
+            if(!is_in_other && !is_duplicate)
                 result.push_back(value);
         }
         return query(std::move(result));
     }
 
     /// Produces the set intersection of two sequences by using the default equality comparer to compare values.
+    /// The result contains only unique elements.
     query intersect(const query& other) const
     {
         std::vector<T> result;
         for(const auto& value : m_data)
         {
-            if(std::find(other.m_data.begin(), other.m_data.end(), value) != other.m_data.end())
+            if(std::find(other.m_data.begin(), other.m_data.end(), value) != other.m_data.end() &&
+               std::find(result.begin(), result.end(), value) == result.end())
                 result.push_back(value);
         }
         return query(std::move(result));
     }
 
     /// Produces the set intersection of two sequences by using the specified equality comparer to compare values.
+    /// The result contains only unique elements according to the comparer.
     template <typename EqualityComparer>
     query intersect(const query& other, EqualityComparer&& comparer) const
     {
         std::vector<T> result;
         for(const auto& value : m_data)
         {
+            bool is_in_other = false;
             for(const auto& other_value : other.m_data)
             {
                 if(comparer(value, other_value))
                 {
-                    result.push_back(value);
+                    is_in_other = true;
                     break;
                 }
             }
+
+            bool is_duplicate = false;
+            for(const auto& existing : result)
+            {
+                if(comparer(value, existing))
+                {
+                    is_duplicate = true;
+                    break;
+                }
+            }
+
+            if(is_in_other && !is_duplicate)
+                result.push_back(value);
         }
         return query(std::move(result));
     }
 
     /// Correlates the elements of two sequences based on matching keys.
-    /// The default equality comparer is used to compare keys.
-    template <typename U, typename KeySelector>
-    query<std::pair<T, U>> join(const query<U>& other, KeySelector&& key_selector) const
+    /// The default equality comparer is used to compare keys selected from each sequence.
+    template <typename U, typename OuterKeySelector, typename InnerKeySelector>
+    query<std::pair<T, U>> join(
+        const query<U>& other,
+        OuterKeySelector&& outer_key_selector,
+        InnerKeySelector&& inner_key_selector) const
     {
         std::vector<std::pair<T, U>> result;
         for(const auto& value : m_data)
         {
-            const auto key = key_selector(value);
+            const auto key = outer_key_selector(value);
             for(const auto& other_value : other.m_data)
             {
-                if(key_selector(other_value) == key)
+                if(inner_key_selector(other_value) == key)
                     result.emplace_back(value, other_value);
             }
         }
@@ -255,17 +305,21 @@ public:
     }
 
     /// Correlates the elements of two sequences based on matching keys.
-    /// The specified equality comparer is used to compare keys.
-    template <typename U, typename KeySelector, typename EqualityComparer>
-    query<std::pair<T, U>> join(const query<U>& other, KeySelector&& key_selector, EqualityComparer&& comparer) const
+    /// The specified equality comparer is used to compare keys selected from each sequence.
+    template <typename U, typename OuterKeySelector, typename InnerKeySelector, typename EqualityComparer>
+    query<std::pair<T, U>> join(
+        const query<U>& other,
+        OuterKeySelector&& outer_key_selector,
+        InnerKeySelector&& inner_key_selector,
+        EqualityComparer&& comparer) const
     {
         std::vector<std::pair<T, U>> result;
         for(const auto& value : m_data)
         {
-            const auto key = key_selector(value);
+            const auto key = outer_key_selector(value);
             for(const auto& other_value : other.m_data)
             {
-                if(comparer(key_selector(other_value), key))
+                if(comparer(inner_key_selector(other_value), key))
                     result.emplace_back(value, other_value);
             }
         }
@@ -340,9 +394,18 @@ public:
     }
 
     /// Produces the set union of two sequences.
+    /// The result contains only unique elements.
     query unite(const query& other) const
     {
-        std::vector<T> result = m_data;
+        std::vector<T> result;
+        result.reserve(m_data.size() + other.m_data.size());
+
+        for(const auto& value : m_data)
+        {
+            if(std::find(result.begin(), result.end(), value) == result.end())
+                result.push_back(value);
+        }
+
         for(const auto& value : other.m_data)
         {
             if(std::find(result.begin(), result.end(), value) == result.end())
