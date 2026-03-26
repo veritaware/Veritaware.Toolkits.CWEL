@@ -369,6 +369,7 @@ public:
     query except(const query& other, EqualityComparer comparer) const
     {
         std::vector<T> result;
+        result.reserve(m_data.size());
         for(const auto& value : m_data)
         {
             bool is_in_other = false;
@@ -438,6 +439,7 @@ public:
     query intersect(const query& other, EqualityComparer comparer) const
     {
         std::vector<T> result;
+        result.reserve(m_data.size());
         for(const auto& value : m_data)
         {
             bool is_in_other = false;
