@@ -401,6 +401,7 @@ public:
     query intersect(const query& other) const
     {
         std::vector<T> result;
+        result.reserve(std::min(m_data.size(), other.m_data.size()));
         if constexpr(detail::can_use_unordered_set_v<T>)
         {
             // Optimized path for hashable types: use hash sets to avoid quadratic scans.
@@ -555,7 +556,7 @@ public:
     {
         std::vector<T> result;
         result.reserve(m_data.size());
-        bool           skipping = true;
+        bool skipping = true;
         for(const auto& value : m_data)
         {
             if(skipping && std::invoke(predicate, value))
