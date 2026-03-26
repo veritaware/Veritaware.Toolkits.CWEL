@@ -505,7 +505,7 @@ public:
         std::vector<std::pair<T, U>> result;
         for(const auto& value : m_data)
         {
-            const auto key = std::invoke(outer_key_selector, value);
+            const auto& key = std::invoke(outer_key_selector, value);
             for(const auto& other_value : other.m_data)
             {
                 if(std::invoke(comparer, std::invoke(inner_key_selector, other_value), key))
