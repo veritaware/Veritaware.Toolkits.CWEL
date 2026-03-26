@@ -8,16 +8,33 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <functional>
 #include <initializer_list>
 #include <numeric>
 #include <stdexcept>
 #include <type_traits>
-#include <typeinfo>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
 namespace vwr
 {
+
+namespace detail
+{
+
+template <typename U, typename = void>
+struct is_hashable : std::false_type
+{};
+
+template <typename U>
+struct is_hashable<U, std::void_t<decltype(std::hash<U>{}(std::declval<const U&>()))>> : std::true_type
+{};
+
+template <typename U>
+inline constexpr bool is_hashable_v = is_hashable<U>::value;
+
+} // namespace detail
 
 template <typename T>
 class query
@@ -31,7 +48,7 @@ public:
     /// Returns a copy of the underlying data vector.
     std::vector<T> get() const { return m_data; }
 
-#pragma region single element queries
+// region: single element queries
     /// Aggregates the elements of the collection using the specified binary predicate
     /// and the provided seed as the initial accumulator.
     template <typename Predicate>
@@ -131,13 +148,13 @@ public:
             return T{};
         return m_data.front();
     }
-#pragma endregion single element queries
+// endregion: single element queries
 
-#pragma region query modifiers
+// region: query modifiers
     template <typename U>
     query<U> cast() const
     {
-        static_assert(std::is_constructible_v<T, U>, "Target type U must be constructible from source type T.");
+        static_assert(std::is_constructible_v<U, T>, "Target type U must be constructible from source type T.");
         std::vector<U> result;
         result.reserve(m_data.size());
         for(const auto& value : m_data)
@@ -159,19 +176,36 @@ public:
     query distinct() const
     {
         std::vector<T> result;
-        for(const auto& value : m_data)
+        result.reserve(m_data.size());
+        if constexpr(detail::is_hashable_v<T>)
         {
-            if(std::find(result.begin(), result.end(), value) == result.end())
-                result.push_back(value);
+            std::unordered_set<T> seen;
+            seen.reserve(m_data.size());
+
+            for(const auto& value : m_data)
+            {
+                if(seen.insert(value).second)
+                    result.push_back(value);
+            }
+        }
+        else
+        {
+            for(const auto& value : m_data)
+            {
+                if(std::find(result.begin(), result.end(), value) == result.end())
+                    result.push_back(value);
+            }
         }
         return query(std::move(result));
     }
 
     /// Returns distinct elements from a sequence by using a specified equality comparer to compare values.
+    /// The comparer should model an equivalence relation for stable, intuitive results.
     template <typename EqualityComparer>
     query distinct(EqualityComparer&& comparer) const
     {
         std::vector<T> result;
+        result.reserve(m_data.size());
         for(const auto& value : m_data)
         {
             bool is_duplicate = false;
@@ -426,9 +460,9 @@ public:
         }
         return query(std::move(result));
     }
-#pragma endregion query modifiers
+// endregion: query modifiers
 
-#pragma region check queries
+// region: check queries
     /// Determines whether all elements of a sequence satisfy a condition.
     template <typename Predicate>
     bool all(Predicate&& predicate) const
@@ -505,7 +539,7 @@ public:
             throw std::out_of_range("Query is empty.");
         return std::accumulate(m_data.begin(), m_data.end(), 0.0);
     }
-#pragma endregion check queries
+// endregion: check queries
 
 private:
     std::vector<T> m_data;
