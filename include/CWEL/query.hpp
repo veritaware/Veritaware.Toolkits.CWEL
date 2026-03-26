@@ -263,11 +263,35 @@ public:
     query except(const query& other) const
     {
         std::vector<T> result;
-        for(const auto& value : m_data)
+        result.reserve(m_data.size());
+
+        if constexpr(detail::can_use_unordered_set_v<T>)
         {
-            if(std::find(other.m_data.begin(), other.m_data.end(), value) == other.m_data.end() &&
-               std::find(result.begin(), result.end(), value) == result.end())
-                result.push_back(value);
+            // Use hash-based sets for efficient membership and uniqueness checks when possible.
+            std::unordered_set<T> other_set(other.m_data.begin(), other.m_data.end());
+            std::unordered_set<T> seen;
+            seen.reserve(m_data.size());
+
+            for(const auto& value : m_data)
+            {
+                if(other_set.find(value) == other_set.end() &&
+                   seen.insert(value).second)
+                {
+                    result.push_back(value);
+                }
+            }
+        }
+        else
+        {
+            // Fallback to linear searches when T cannot be used in an unordered_set.
+            for(const auto& value : m_data)
+            {
+                if(std::find(other.m_data.begin(), other.m_data.end(), value) == other.m_data.end() &&
+                   std::find(result.begin(), result.end(), value) == result.end())
+                {
+                    result.push_back(value);
+                }
+            }
         }
         return query(std::move(result));
     }
@@ -309,11 +333,30 @@ public:
     query intersect(const query& other) const
     {
         std::vector<T> result;
-        for(const auto& value : m_data)
+        if constexpr(detail::is_hashable_v<T>)
         {
-            if(std::find(other.m_data.begin(), other.m_data.end(), value) != other.m_data.end() &&
-               std::find(result.begin(), result.end(), value) == result.end())
-                result.push_back(value);
+            // Optimized path for hashable types: use hash sets to avoid quadratic scans.
+            std::unordered_set<T> other_set(other.m_data.begin(), other.m_data.end());
+            std::unordered_set<T> seen;
+            for(const auto& value : m_data)
+            {
+                if(other_set.find(value) != other_set.end())
+                {
+                    // seen.insert(value).second is true only if value was not already present.
+                    if(seen.insert(value).second)
+                        result.push_back(value);
+                }
+            }
+        }
+        else
+        {
+            // Fallback for non-hashable types: preserve original std::find-based behavior.
+            for(const auto& value : m_data)
+            {
+                if(std::find(other.m_data.begin(), other.m_data.end(), value) != other.m_data.end() &&
+                   std::find(result.begin(), result.end(), value) == result.end())
+                    result.push_back(value);
+            }
         }
         return query(std::move(result));
     }
@@ -469,16 +512,36 @@ public:
         std::vector<T> result;
         result.reserve(m_data.size() + other.m_data.size());
 
-        for(const auto& value : m_data)
+        if constexpr(detail::can_use_unordered_set_v<T>)
         {
-            if(std::find(result.begin(), result.end(), value) == result.end())
-                result.push_back(value);
-        }
+            std::unordered_set<T> seen;
+            seen.reserve(m_data.size() + other.m_data.size());
 
-        for(const auto& value : other.m_data)
+            for(const auto& value : m_data)
+            {
+                if(seen.insert(value).second)
+                    result.push_back(value);
+            }
+
+            for(const auto& value : other.m_data)
+            {
+                if(seen.insert(value).second)
+                    result.push_back(value);
+            }
+        }
+        else
         {
-            if(std::find(result.begin(), result.end(), value) == result.end())
-                result.push_back(value);
+            for(const auto& value : m_data)
+            {
+                if(std::find(result.begin(), result.end(), value) == result.end())
+                    result.push_back(value);
+            }
+
+            for(const auto& value : other.m_data)
+            {
+                if(std::find(result.begin(), result.end(), value) == result.end())
+                    result.push_back(value);
+            }
         }
         return query(std::move(result));
     }
