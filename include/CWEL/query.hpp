@@ -47,6 +47,17 @@ struct is_equality_comparable<
 template <typename U>
 inline constexpr bool can_use_unordered_set_v = is_hashable_v<U> && is_equality_comparable<U>::value;
 
+template <typename From, typename To, typename = void>
+struct is_static_castable : std::false_type
+{};
+
+template <typename From, typename To>
+struct is_static_castable<From, To, std::void_t<decltype(static_cast<To>(std::declval<From>()))>> : std::true_type
+{};
+
+template <typename From, typename To>
+inline constexpr bool is_static_castable_v = is_static_castable<From, To>::value;
+
 } // namespace detail
 
 template <typename T>
@@ -176,7 +187,9 @@ public:
     template <typename U>
     query<U> cast() const
     {
-        static_assert(std::is_constructible_v<U, T>, "Target type U must be constructible from source type T.");
+        static_assert(
+            detail::is_static_castable_v<const T&, U>,
+            "query<T>::cast<U>() requires static_cast<U>(const T&) to be well-formed.");
         std::vector<U> result;
         result.reserve(m_data.size());
         for(const auto& value : m_data)
@@ -555,11 +568,11 @@ public:
     /// Computes the sum of a sequence of numeric values.
     /// Only available when T is an arithmetic type.
     template <typename Dummy = void, std::enable_if_t<std::is_arithmetic_v<T>, int> = 0>
-    double sum() const
+    T sum() const
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
-        return std::accumulate(m_data.begin(), m_data.end(), 0.0);
+        return std::accumulate(m_data.begin(), m_data.end(), static_cast<T>(0));
     }
 // endregion: check queries
 
