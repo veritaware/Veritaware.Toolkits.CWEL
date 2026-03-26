@@ -12,7 +12,8 @@ AccessModifierOffset: -4
 
 SpaceBeforeParens: Never
 
-AllowShortFunctionsOnASingleLine: None
+AllowShortFunctionsOnASingleLine: All
+AlwaysBreakTemplateDeclarations: Yes
 
 PointerAlignment: Left
 ReferenceAlignment: Left
