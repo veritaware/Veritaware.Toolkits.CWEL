@@ -25,7 +25,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Bb]uild/
-cmake-build-debug/
+cmake-build-*/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
