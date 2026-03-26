@@ -552,6 +552,7 @@ public:
     query skip_while(Predicate predicate) const
     {
         std::vector<T> result;
+        result.reserve(m_data.size());
         bool           skipping = true;
         for(const auto& value : m_data)
         {
@@ -569,6 +570,7 @@ public:
     query take_while(Predicate predicate) const
     {
         std::vector<T> result;
+        result.reserve(m_data.size());
         for(const auto& value : m_data)
         {
             if(!std::invoke(predicate, value))
@@ -624,6 +626,7 @@ public:
     query where(Predicate predicate) const
     {
         std::vector<T> result;
+        result.reserve(m_data.size());
         for(const auto& value : m_data)
         {
             if(std::invoke(predicate, value))
