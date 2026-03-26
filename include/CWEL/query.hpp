@@ -34,6 +34,19 @@ struct is_hashable<U, std::void_t<decltype(std::hash<U>{}(std::declval<const U&>
 template <typename U>
 inline constexpr bool is_hashable_v = is_hashable<U>::value;
 
+template <typename U, typename = void>
+struct is_equality_comparable : std::false_type
+{};
+
+template <typename U>
+struct is_equality_comparable<
+    U,
+    std::void_t<decltype(std::equal_to<U>{}(std::declval<const U&>(), std::declval<const U&>()))>> : std::true_type
+{};
+
+template <typename U>
+inline constexpr bool can_use_unordered_set_v = is_hashable_v<U> && is_equality_comparable<U>::value;
+
 } // namespace detail
 
 template <typename T>
@@ -94,6 +107,9 @@ public:
     /// Returns the first element of a sequence, or a default value if no element is found.
     T first_or_default() const
     {
+        static_assert(
+            std::is_default_constructible_v<T>,
+            "query<T>::first_or_default() requires T to be default-constructible.");
         if(m_data.empty())
             return T{};
         return m_data.front();
@@ -118,6 +134,9 @@ public:
     /// Returns the last element of a sequence, or a default value if no element is found.
     T last_or_default() const
     {
+        static_assert(
+            std::is_default_constructible_v<T>,
+            "query<T>::last_or_default() requires T to be default-constructible.");
         if(m_data.empty())
             return T{};
         return m_data.back();
@@ -142,6 +161,9 @@ public:
     /// Returns a single, specific element of a sequence, or a default value if that element is not found.
     T single_or_default() const
     {
+        static_assert(
+            std::is_default_constructible_v<T>,
+            "query<T>::single_or_default() requires T to be default-constructible.");
         if(m_data.size() > 1)
             throw std::out_of_range("Query contains more than one element.");
         if(m_data.empty())
@@ -177,7 +199,7 @@ public:
     {
         std::vector<T> result;
         result.reserve(m_data.size());
-        if constexpr(detail::is_hashable_v<T>)
+        if constexpr(detail::can_use_unordered_set_v<T>)
         {
             std::unordered_set<T> seen;
             seen.reserve(m_data.size());
@@ -490,8 +512,8 @@ public:
     /// Computes the average of a sequence of numeric values.
     /// Only available when T is an arithmetic type.
     /// For integral types, returns a double to avoid truncation.
-    template <typename U = T>
-    std::enable_if_t<std::is_arithmetic_v<U>, double> average() const
+    template <typename Dummy = void, std::enable_if_t<std::is_arithmetic_v<T>, int> = 0>
+    double average() const
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -512,8 +534,8 @@ public:
 
     /// Returns the maximum value in a sequence of values.
     /// Only available when T is an arithmetic type.
-    template <typename U = T>
-    std::enable_if_t<std::is_arithmetic_v<U>, T> max() const
+    template <typename Dummy = void, std::enable_if_t<std::is_arithmetic_v<T>, int> = 0>
+    T max() const
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -522,8 +544,8 @@ public:
 
     /// Returns the minimum value in a sequence of values.
     /// Only available when T is an arithmetic type.
-    template <typename U = T>
-    std::enable_if_t<std::is_arithmetic_v<U>, T> min() const
+    template <typename Dummy = void, std::enable_if_t<std::is_arithmetic_v<T>, int> = 0>
+    T min() const
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -532,8 +554,8 @@ public:
 
     /// Computes the sum of a sequence of numeric values.
     /// Only available when T is an arithmetic type.
-    template <typename U = T>
-    std::enable_if_t<std::is_arithmetic_v<U>, double> sum() const
+    template <typename Dummy = void, std::enable_if_t<std::is_arithmetic_v<T>, int> = 0>
+    double sum() const
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
