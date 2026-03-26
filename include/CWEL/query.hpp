@@ -267,7 +267,9 @@ public:
     /// Concatenates two sequences.
     query concat(const query& other) const
     {
-        std::vector<T> result = m_data;
+        std::vector<T> result;
+        result.reserve(m_data.size() + other.m_data.size());
+        result.insert(result.end(), m_data.begin(), m_data.end());
         result.insert(result.end(), other.m_data.begin(), other.m_data.end());
         return query(std::move(result));
     }
@@ -401,8 +403,12 @@ public:
         if constexpr(detail::can_use_unordered_set_v<T>)
         {
             // Optimized path for hashable types: use hash sets to avoid quadratic scans.
-            std::unordered_set<T> other_set(other.m_data.begin(), other.m_data.end());
+            std::unordered_set<T> other_set;
+            other_set.reserve(other.m_data.size());
+            other_set.insert(other.m_data.begin(), other.m_data.end());
+
             std::unordered_set<T> seen;
+            seen.reserve(m_data.size());
             for(const auto& value : m_data)
             {
                 if(other_set.find(value) != other_set.end())
@@ -477,7 +483,7 @@ public:
         std::vector<std::pair<T, U>> result;
         for(const auto& value : m_data)
         {
-            const auto key = std::invoke(outer_key_selector, value);
+            const auto& key = std::invoke(outer_key_selector, value);
             for(const auto& other_value : other.m_data)
             {
                 if(std::invoke(inner_key_selector, other_value) == key)
