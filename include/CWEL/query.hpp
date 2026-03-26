@@ -66,7 +66,8 @@ class query
 public:
     explicit query(std::vector<T> data) : m_data(std::move(data)) {}
     explicit query(std::initializer_list<T> data) : m_data(data) {}
-    template <typename InputIt>
+    template <typename InputIt,
+              typename = std::enable_if_t<!std::is_integral<InputIt>::value>>
     explicit query(InputIt begin, InputIt end) : m_data(begin, end) {}
 
     /// Returns a copy of the underlying data vector.
@@ -451,12 +452,8 @@ public:
     {
         if(m_data.size() != other.m_data.size())
             return false;
-        for(size_t i = 0; i < m_data.size(); ++i)
-        {
-            if(m_data[i] != other.m_data[i])
-                return false;
-        }
-        return true;
+
+        return std::equal(m_data.begin(), m_data.end(), other.m_data.begin());
     }
 
     /// Determines whether two sequences are equal by comparing the elements by using the specified equality comparer.
