@@ -662,12 +662,21 @@ public:
     /// Only available when T is an arithmetic type.
     /// For integral types, returns a double to avoid truncation.
     template <typename Dummy = void, std::enable_if_t<std::is_arithmetic_v<T>, int> = 0>
-    double average() const
+    auto average() const -> std::conditional_t<std::is_integral_v<T>, double, T>
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
-        const double sum = std::accumulate(m_data.begin(), m_data.end(), 0.0);
-        return sum / static_cast<double>(m_data.size());
+        using Result = std::conditional_t<std::is_integral_v<T>, double, T>;
+        using Accumulator = std::conditional_t<std::is_integral_v<T>, double, long double>;
+        const Accumulator sum = std::accumulate(
+            m_data.begin(),
+            m_data.end(),
+            Accumulator{0},
+            [](Accumulator acc, const T& value)
+            {
+                return acc + static_cast<Accumulator>(value);
+            });
+        return static_cast<Result>(sum / static_cast<Accumulator>(m_data.size()));
     }
 
     /// Determines whether a sequence contains a specified element by using the default equality comparer.
