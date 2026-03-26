@@ -77,18 +77,18 @@ public:
     /// Aggregates the elements of the collection using the specified binary predicate
     /// and the provided seed as the initial accumulator.
     template <typename Predicate>
-    T aggregate(T seed, Predicate&& predicate) const
+    T aggregate(T seed, Predicate predicate) const
     {
         T result = seed;
         for(const auto& value : m_data)
-            result = predicate(result, value);
+            result = std::invoke(predicate, result, value);
         return result;
     }
 
     /// Aggregates the elements of the collection using the specified binary predicate.
     /// Uses the first element as the initial accumulator and throws if the sequence is empty.
     template <typename Predicate>
-    T aggregate(Predicate&& predicate) const
+    T aggregate(Predicate predicate) const
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -96,7 +96,7 @@ public:
         T result = *it;
         ++it;
         for(; it != m_data.end(); ++it)
-            result = predicate(result, *it);
+            result = std::invoke(predicate, result, *it);
         return result;
     }
 
@@ -238,7 +238,7 @@ public:
     /// Returns distinct elements from a sequence by using a specified equality comparer to compare values.
     /// The comparer should model an equivalence relation for stable, intuitive results.
     template <typename EqualityComparer>
-    query distinct(EqualityComparer&& comparer) const
+    query distinct(EqualityComparer comparer) const
     {
         std::vector<T> result;
         result.reserve(m_data.size());
@@ -247,7 +247,7 @@ public:
             bool is_duplicate = false;
             for(const auto& existing : result)
             {
-                if(comparer(value, existing))
+                if(std::invoke(comparer, value, existing))
                 {
                     is_duplicate = true;
                     break;
@@ -300,7 +300,7 @@ public:
     /// Produces the set difference of two sequences by using the specified equality comparer to compare values.
     /// The result contains only unique elements according to the comparer.
     template <typename EqualityComparer>
-    query except(const query& other, EqualityComparer&& comparer) const
+    query except(const query& other, EqualityComparer comparer) const
     {
         std::vector<T> result;
         for(const auto& value : m_data)
@@ -308,7 +308,7 @@ public:
             bool is_in_other = false;
             for(const auto& other_value : other.m_data)
             {
-                if(comparer(value, other_value))
+                if(std::invoke(comparer, value, other_value))
                 {
                     is_in_other = true;
                     break;
@@ -317,7 +317,7 @@ public:
             bool is_duplicate = false;
             for(const auto& existing : result)
             {
-                if(comparer(value, existing))
+                if(std::invoke(comparer, value, existing))
                 {
                     is_duplicate = true;
                     break;
@@ -365,7 +365,7 @@ public:
     /// Produces the set intersection of two sequences by using the specified equality comparer to compare values.
     /// The result contains only unique elements according to the comparer.
     template <typename EqualityComparer>
-    query intersect(const query& other, EqualityComparer&& comparer) const
+    query intersect(const query& other, EqualityComparer comparer) const
     {
         std::vector<T> result;
         for(const auto& value : m_data)
@@ -373,7 +373,7 @@ public:
             bool is_in_other = false;
             for(const auto& other_value : other.m_data)
             {
-                if(comparer(value, other_value))
+                if(std::invoke(comparer, value, other_value))
                 {
                     is_in_other = true;
                     break;
@@ -383,7 +383,7 @@ public:
             bool is_duplicate = false;
             for(const auto& existing : result)
             {
-                if(comparer(value, existing))
+                if(std::invoke(comparer, value, existing))
                 {
                     is_duplicate = true;
                     break;
@@ -401,16 +401,16 @@ public:
     template <typename U, typename OuterKeySelector, typename InnerKeySelector>
     query<std::pair<T, U>> join(
         const query<U>& other,
-        OuterKeySelector&& outer_key_selector,
-        InnerKeySelector&& inner_key_selector) const
+        OuterKeySelector outer_key_selector,
+        InnerKeySelector inner_key_selector) const
     {
         std::vector<std::pair<T, U>> result;
         for(const auto& value : m_data)
         {
-            const auto key = outer_key_selector(value);
+            const auto key = std::invoke(outer_key_selector, value);
             for(const auto& other_value : other.m_data)
             {
-                if(inner_key_selector(other_value) == key)
+                if(std::invoke(inner_key_selector, other_value) == key)
                     result.emplace_back(value, other_value);
             }
         }
@@ -422,17 +422,17 @@ public:
     template <typename U, typename OuterKeySelector, typename InnerKeySelector, typename EqualityComparer>
     query<std::pair<T, U>> join(
         const query<U>& other,
-        OuterKeySelector&& outer_key_selector,
-        InnerKeySelector&& inner_key_selector,
-        EqualityComparer&& comparer) const
+        OuterKeySelector outer_key_selector,
+        InnerKeySelector inner_key_selector,
+        EqualityComparer comparer) const
     {
         std::vector<std::pair<T, U>> result;
         for(const auto& value : m_data)
         {
-            const auto key = outer_key_selector(value);
+            const auto key = std::invoke(outer_key_selector, value);
             for(const auto& other_value : other.m_data)
             {
-                if(comparer(inner_key_selector(other_value), key))
+                if(std::invoke(comparer, std::invoke(inner_key_selector, other_value), key))
                     result.emplace_back(value, other_value);
             }
         }
@@ -458,13 +458,13 @@ public:
 
     /// Determines whether two sequences are equal by comparing the elements by using the specified equality comparer.
     template <typename EqualityComparer>
-    bool sequence_equal(const query& other, EqualityComparer&& comparer) const
+    bool sequence_equal(const query& other, EqualityComparer comparer) const
     {
         if(m_data.size() != other.m_data.size())
             return false;
         for(size_t i = 0; i < m_data.size(); ++i)
         {
-            if(!comparer(m_data[i], other.m_data[i]))
+            if(!std::invoke(comparer, m_data[i], other.m_data[i]))
                 return false;
         }
         return true;
@@ -473,13 +473,13 @@ public:
     /// Bypasses elements in a sequence as long as a specified condition is true,
     /// and then returns the remaining elements.
     template <typename Predicate>
-    query skip_while(Predicate&& predicate) const
+    query skip_while(Predicate predicate) const
     {
         std::vector<T> result;
         bool           skipping = true;
         for(const auto& value : m_data)
         {
-            if(skipping && predicate(value))
+            if(skipping && std::invoke(predicate, value))
                 continue;
             skipping = false;
             result.push_back(value);
@@ -490,12 +490,12 @@ public:
     /// Returns elements from a sequence as long as a specified condition is true,
     /// and then skips the remaining elements.
     template <typename Predicate>
-    query take_while(Predicate&& predicate) const
+    query take_while(Predicate predicate) const
     {
         std::vector<T> result;
         for(const auto& value : m_data)
         {
-            if(!predicate(value))
+            if(!std::invoke(predicate, value))
                 break;
             result.push_back(value);
         }
@@ -545,12 +545,12 @@ public:
 
     /// Filters a sequence of values based on a predicate.
     template <typename Predicate>
-    query where(Predicate&& predicate) const
+    query where(Predicate predicate) const
     {
         std::vector<T> result;
         for(const auto& value : m_data)
         {
-            if(predicate(value))
+            if(std::invoke(predicate, value))
                 result.push_back(value);
         }
         return query(std::move(result));
@@ -560,11 +560,11 @@ public:
 // region: check queries
     /// Determines whether all elements of a sequence satisfy a condition.
     template <typename Predicate>
-    bool all(Predicate&& predicate) const
+    bool all(Predicate predicate) const
     {
         for(const auto& value : m_data)
         {
-            if(!predicate(value))
+            if(!std::invoke(predicate, value))
                 return false;
         }
         return true;
@@ -572,11 +572,11 @@ public:
 
     /// Determines whether any element of a sequence satisfies a condition.
     template <typename Predicate>
-    bool any(Predicate&& predicate) const
+    bool any(Predicate predicate) const
     {
         for(const auto& value : m_data)
         {
-            if(predicate(value))
+            if(std::invoke(predicate, value))
                 return true;
         }
         return false;
