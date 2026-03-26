@@ -5,16 +5,9 @@ set(CMAKE_CXX_STANDARD 11)
 
 add_library(CWEL
         src/Veritaware.Toolkits.CWEL.cpp
-        src/IGetHashCode.cpp
-        src/IToString.cpp
-        src/Object.cpp
-        src/Color.cpp
-        src/VectorExtensions.cpp
-        src/Event.cpp
-        src/DependencyProperty.cpp
         )
 
-target_include_directories(CWEL PUBLIC include)
+target_include_directories(CWEL PUBLIC include/CWEL)
 
 target_compile_features(CWEL
         PUBLIC cxx_auto_type
