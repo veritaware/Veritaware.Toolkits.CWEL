@@ -47,6 +47,22 @@ struct is_equality_comparable<
 template <typename U>
 inline constexpr bool can_use_unordered_set_v = is_hashable_v<U> && is_equality_comparable<U>::value;
 
+template <typename Left, typename Right, typename = void>
+struct is_equality_comparable_with : std::false_type
+{};
+
+template <typename Left, typename Right>
+struct is_equality_comparable_with<
+    Left,
+    Right,
+    std::void_t<decltype(std::declval<const Left&>() == std::declval<const Right&>())>>
+    : std::bool_constant<
+          std::is_convertible_v<decltype(std::declval<const Left&>() == std::declval<const Right&>()), bool>>
+{};
+
+template <typename Left, typename Right>
+inline constexpr bool is_equality_comparable_with_v = is_equality_comparable_with<Left, Right>::value;
+
 template <typename From, typename To, typename = void>
 struct is_static_castable : std::false_type
 {};
@@ -101,7 +117,7 @@ public:
     }
 
     /// Returns the first element of a sequence.
-    T& first()
+    T& first() &
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -109,7 +125,23 @@ public:
     }
 
     /// Returns the first element of a sequence.
-    const T& first() const
+    const T& first() const &
+    {
+        if(m_data.empty())
+            throw std::out_of_range("Query is empty.");
+        return m_data.front();
+    }
+
+    /// Returns the first element of a sequence.
+    T first() &&
+    {
+        if(m_data.empty())
+            throw std::out_of_range("Query is empty.");
+        return std::move(m_data.front());
+    }
+
+    /// Returns the first element of a sequence.
+    T first() const &&
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -128,7 +160,7 @@ public:
     }
 
     /// Returns the last element of a sequence.
-    T& last()
+    T& last() &
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -136,7 +168,23 @@ public:
     }
 
     /// Returns the last element of a sequence.
-    const T& last() const
+    const T& last() const &
+    {
+        if(m_data.empty())
+            throw std::out_of_range("Query is empty.");
+        return m_data.back();
+    }
+
+    /// Returns the last element of a sequence.
+    T last() &&
+    {
+        if(m_data.empty())
+            throw std::out_of_range("Query is empty.");
+        return std::move(m_data.back());
+    }
+
+    /// Returns the last element of a sequence.
+    T last() const &&
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -155,7 +203,7 @@ public:
     }
 
     /// Returns a single, specific element of a sequence.
-    T& single()
+    T& single() &
     {
         if(m_data.size() != 1)
             throw std::out_of_range("Query does not contain exactly one element.");
@@ -163,7 +211,23 @@ public:
     }
 
     /// Returns a single, specific element of a sequence.
-    const T& single() const
+    const T& single() const &
+    {
+        if(m_data.size() != 1)
+            throw std::out_of_range("Query does not contain exactly one element.");
+        return m_data.front();
+    }
+
+    /// Returns a single, specific element of a sequence.
+    T single() &&
+    {
+        if(m_data.size() != 1)
+            throw std::out_of_range("Query does not contain exactly one element.");
+        return std::move(m_data.front());
+    }
+
+    /// Returns a single, specific element of a sequence.
+    T single() const &&
     {
         if(m_data.size() != 1)
             throw std::out_of_range("Query does not contain exactly one element.");
@@ -334,7 +398,7 @@ public:
     query intersect(const query& other) const
     {
         std::vector<T> result;
-        if constexpr(detail::is_hashable_v<T>)
+        if constexpr(detail::can_use_unordered_set_v<T>)
         {
             // Optimized path for hashable types: use hash sets to avoid quadratic scans.
             std::unordered_set<T> other_set(other.m_data.begin(), other.m_data.end());
@@ -404,6 +468,12 @@ public:
         OuterKeySelector outer_key_selector,
         InnerKeySelector inner_key_selector) const
     {
+        using outer_key_t = std::invoke_result_t<OuterKeySelector&, const T&>;
+        using inner_key_t = std::invoke_result_t<InnerKeySelector&, const U&>;
+        static_assert(
+            detail::is_equality_comparable_with_v<inner_key_t, outer_key_t>,
+            "query<T>::join(...) requires selected key types to be comparable with operator==.");
+
         std::vector<std::pair<T, U>> result;
         for(const auto& value : m_data)
         {
