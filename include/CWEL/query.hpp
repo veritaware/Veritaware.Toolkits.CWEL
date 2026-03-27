@@ -22,58 +22,49 @@ namespace vwr
 
 namespace detail
 {
+    template <typename U, typename = void>
+    struct is_hashable : std::false_type {};
 
-template <typename U, typename = void>
-struct is_hashable : std::false_type
-{};
+    template <typename U>
+    struct is_hashable<U, std::void_t<decltype(std::hash<U>{}(std::declval<const U&>()))>> : std::true_type {};
 
-template <typename U>
-struct is_hashable<U, std::void_t<decltype(std::hash<U>{}(std::declval<const U&>()))>> : std::true_type
-{};
+    template <typename U>
+    inline constexpr bool is_hashable_v = is_hashable<U>::value;
 
-template <typename U>
-inline constexpr bool is_hashable_v = is_hashable<U>::value;
+    template <typename U, typename = void>
+    struct is_equality_comparable : std::false_type {};
 
-template <typename U, typename = void>
-struct is_equality_comparable : std::false_type
-{};
+    template <typename U>
+    struct is_equality_comparable<U, std::void_t<
+        decltype(std::equal_to<U>{}(std::declval<const U&>(), std::declval<const U&>()))
+    >> : std::true_type {};
 
-template <typename U>
-struct is_equality_comparable<
-    U,
-    std::void_t<decltype(std::equal_to<U>{}(std::declval<const U&>(), std::declval<const U&>()))>> : std::true_type
-{};
+    template <typename U>
+    inline constexpr bool can_use_unordered_set_v = is_hashable_v<U> && is_equality_comparable<U>::value;
 
-template <typename U>
-inline constexpr bool can_use_unordered_set_v = is_hashable_v<U> && is_equality_comparable<U>::value;
+    template <typename, typename, typename = void>
+    struct is_equality_comparable_with : std::false_type {};
 
-template <typename Left, typename Right, typename = void>
-struct is_equality_comparable_with : std::false_type
-{};
+    template <typename Left, typename Right>
+    struct is_equality_comparable_with<Left, Right, std::void_t<
+        decltype(std::declval<const Left&>() == std::declval<const Right&>())
+    >> : std::bool_constant<std::is_convertible_v<
+        decltype(std::declval<const Left&>() == std::declval<const Right&>()), bool
+    >> {};
 
-template <typename Left, typename Right>
-struct is_equality_comparable_with<
-    Left,
-    Right,
-    std::void_t<decltype(std::declval<const Left&>() == std::declval<const Right&>())>>
-    : std::bool_constant<
-          std::is_convertible_v<decltype(std::declval<const Left&>() == std::declval<const Right&>()), bool>>
-{};
+    template <typename Left, typename Right>
+    inline constexpr bool is_equality_comparable_with_v = is_equality_comparable_with<Left, Right>::value;
 
-template <typename Left, typename Right>
-inline constexpr bool is_equality_comparable_with_v = is_equality_comparable_with<Left, Right>::value;
+    template <typename, typename, typename = void>
+    struct is_static_castable : std::false_type {};
 
-template <typename From, typename To, typename = void>
-struct is_static_castable : std::false_type
-{};
+    template <typename From, typename To>
+    struct is_static_castable<From, To, std::void_t<
+        decltype(static_cast<To>(std::declval<From>()))
+    >> : std::true_type {};
 
-template <typename From, typename To>
-struct is_static_castable<From, To, std::void_t<decltype(static_cast<To>(std::declval<From>()))>> : std::true_type
-{};
-
-template <typename From, typename To>
-inline constexpr bool is_static_castable_v = is_static_castable<From, To>::value;
-
+    template <typename From, typename To>
+    inline constexpr bool is_static_castable_v = is_static_castable<From, To>::value;
 } // namespace detail
 
 template <typename T>
@@ -82,8 +73,7 @@ class query
 public:
     explicit query(std::vector<T> data) : m_data(std::move(data)) {}
     explicit query(std::initializer_list<T> data) : m_data(data) {}
-    template <typename InputIt,
-              typename = std::enable_if_t<!std::is_integral<InputIt>::value>>
+    template <typename InputIt, typename = std::enable_if_t<!std::is_integral_v<InputIt>>>
     explicit query(InputIt begin, InputIt end) : m_data(begin, end) {}
 
     /// Returns a copy of the underlying data vector.
@@ -125,7 +115,7 @@ public:
     }
 
     /// Returns the first element of a sequence.
-    const T& first() const &
+    const T& first() const&
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -141,7 +131,7 @@ public:
     }
 
     /// Returns the first element of a sequence.
-    T first() const &&
+    T first() const&&
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -153,7 +143,8 @@ public:
     {
         static_assert(
             std::is_default_constructible_v<T>,
-            "query<T>::first_or_default() requires T to be default-constructible.");
+            "query<T>::first_or_default() requires T to be default-constructible."
+        );
         if(m_data.empty())
             return T{};
         return m_data.front();
@@ -168,7 +159,7 @@ public:
     }
 
     /// Returns the last element of a sequence.
-    const T& last() const &
+    const T& last() const&
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -184,7 +175,7 @@ public:
     }
 
     /// Returns the last element of a sequence.
-    T last() const &&
+    T last() const&&
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -196,7 +187,8 @@ public:
     {
         static_assert(
             std::is_default_constructible_v<T>,
-            "query<T>::last_or_default() requires T to be default-constructible.");
+            "query<T>::last_or_default() requires T to be default-constructible."
+        );
         if(m_data.empty())
             return T{};
         return m_data.back();
@@ -211,7 +203,7 @@ public:
     }
 
     /// Returns a single, specific element of a sequence.
-    const T& single() const &
+    const T& single() const&
     {
         if(m_data.size() != 1)
             throw std::out_of_range("Query does not contain exactly one element.");
@@ -227,7 +219,7 @@ public:
     }
 
     /// Returns a single, specific element of a sequence.
-    T single() const &&
+    T single() const&&
     {
         if(m_data.size() != 1)
             throw std::out_of_range("Query does not contain exactly one element.");
@@ -239,7 +231,8 @@ public:
     {
         static_assert(
             std::is_default_constructible_v<T>,
-            "query<T>::single_or_default() requires T to be default-constructible.");
+            "query<T>::single_or_default() requires T to be default-constructible."
+        );
         if(m_data.size() > 1)
             throw std::out_of_range("Query contains more than one element.");
         if(m_data.empty())
@@ -254,13 +247,12 @@ public:
     {
         static_assert(
             detail::is_static_castable_v<const T&, U>,
-            "query<T>::cast<U>() requires static_cast<U>(const T&) to be well-formed.");
+            "query<T>::cast<U>() requires static_cast<U>(const T&) to be well-formed."
+        );
         std::vector<U> result;
         result.reserve(m_data.size());
         for(const auto& value : m_data)
-        {
             result.push_back(static_cast<U>(value));
-        }
         return query<U>(std::move(result));
     }
 
@@ -341,8 +333,7 @@ public:
 
             for(const auto& value : m_data)
             {
-                if(other_set.find(value) == other_set.end() &&
-                   seen.insert(value).second)
+                if(!other_set.contains(value) && seen.insert(value).second)
                 {
                     result.push_back(value);
                 }
@@ -413,7 +404,7 @@ public:
             seen.reserve(m_data.size());
             for(const auto& value : m_data)
             {
-                if(other_set.find(value) != other_set.end())
+                if(other_set.contains(value))
                 {
                     // seen.insert(value).second is true only if value was not already present.
                     if(seen.insert(value).second)
@@ -472,16 +463,15 @@ public:
     /// Correlates the elements of two sequences based on matching keys.
     /// The default equality comparer is used to compare keys selected from each sequence.
     template <typename U, typename OuterKeySelector, typename InnerKeySelector>
-    query<std::pair<T, U>> join(
-        const query<U>& other,
-        OuterKeySelector outer_key_selector,
-        InnerKeySelector inner_key_selector) const
+    query<std::pair<T, U>> join(const query<U>& other, OuterKeySelector outer_key_selector,
+                                InnerKeySelector inner_key_selector) const
     {
         using outer_key_t = std::invoke_result_t<OuterKeySelector&, const T&>;
         using inner_key_t = std::invoke_result_t<InnerKeySelector&, const U&>;
         static_assert(
             detail::is_equality_comparable_with_v<inner_key_t, outer_key_t>,
-            "query<T>::join(...) requires selected key types to be comparable with operator==.");
+            "query<T>::join(...) requires selected key types to be comparable with operator==."
+        );
 
         std::vector<std::pair<T, U>> result;
         for(const auto& value : m_data)
@@ -499,11 +489,8 @@ public:
     /// Correlates the elements of two sequences based on matching keys.
     /// The specified equality comparer is used to compare keys selected from each sequence.
     template <typename U, typename OuterKeySelector, typename InnerKeySelector, typename EqualityComparer>
-    query<std::pair<T, U>> join(
-        const query<U>& other,
-        OuterKeySelector outer_key_selector,
-        InnerKeySelector inner_key_selector,
-        EqualityComparer comparer) const
+    query<std::pair<T, U>> join(const query<U>& other, OuterKeySelector outer_key_selector,
+                                InnerKeySelector inner_key_selector, EqualityComparer comparer) const
     {
         std::vector<std::pair<T, U>> result;
         for(const auto& value : m_data)
@@ -665,13 +652,9 @@ public:
         using Result = std::conditional_t<std::is_integral_v<T>, double, T>;
         using Accumulator = std::conditional_t<std::is_integral_v<T>, double, long double>;
         const Accumulator total = std::accumulate(
-            m_data.begin(),
-            m_data.end(),
-            Accumulator{0},
-            [](Accumulator acc, const T& value)
-            {
-                return acc + static_cast<Accumulator>(value);
-            });
+            m_data.begin(), m_data.end(), Accumulator{0},
+            [](Accumulator acc, const T& value) { return acc + static_cast<Accumulator>(value); }
+        );
         return static_cast<Result>(total / static_cast<Accumulator>(m_data.size()));
     }
 
