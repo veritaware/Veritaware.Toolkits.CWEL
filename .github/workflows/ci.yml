@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  build-and-test:
+    name: Build, analyze, and test
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake clang clang-tidy cppcheck
+
+      - name: Configure (CMake)
+        run: >
+          cmake -B build
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          -DCMAKE_CXX_COMPILER=clang++
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Run tests (CTest)
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Run cppcheck
+        run: >
+          find include -name '*.hpp' | xargs
+          cppcheck
+          --enable=all
+          --std=c++17
+          --suppress=missingIncludeSystem
+          --suppress=unusedFunction
+          --suppress=useStlAlgorithm
+          --error-exitcode=1
+
+      - name: Run clang-tidy
+        run: >
+          clang-tidy
+          -p build
+          test/test_query.cpp
+          --warnings-as-errors=*
