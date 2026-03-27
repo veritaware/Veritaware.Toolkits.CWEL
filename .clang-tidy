@@ -1,0 +1,18 @@
+---
+Checks: >
+  bugprone-*,
+  modernize-*,
+  performance-*,
+  readability-*,
+  -modernize-use-trailing-return-type,
+  -modernize-use-nodiscard,
+  -modernize-type-traits,
+  -readability-magic-numbers,
+  -readability-function-cognitive-complexity,
+  -readability-braces-around-statements,
+  -readability-identifier-length,
+  -clang-analyzer-optin.core.EnumCastOutOfRange
+
+WarningsAsErrors: "*"
+
+HeaderFilterRegex: "include/CWEL/.*"
