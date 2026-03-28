@@ -73,8 +73,9 @@ class query
 public:
     explicit query(std::vector<T> data) : m_data(std::move(data)) {}
     explicit query(std::initializer_list<T> data) : m_data(data) {}
-    template <typename InputIt, typename = std::enable_if_t<!std::is_integral_v<InputIt>>>
-    explicit query(InputIt begin, InputIt end) : m_data(begin, end) {}
+    template <typename InputIt>
+    explicit query(InputIt begin, InputIt end)
+    requires (!std::is_integral_v<InputIt>) : m_data(begin, end) {}
 
     /// Returns a copy of the underlying data vector.
     std::vector<T> get() const { return m_data; }
@@ -644,9 +645,9 @@ public:
     /// Computes the average of a sequence of numeric values.
     /// Only available when T is an arithmetic type.
     /// For integral types, returns a double to avoid truncation.
-    template <typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, int> = 0>
+    template <typename U = T>
     auto average() const -> std::conditional_t<std::is_integral_v<T>, double, T>
-    {
+    requires (std::is_arithmetic_v<U>) {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
         using Result = std::conditional_t<std::is_integral_v<T>, double, T>;
@@ -666,9 +667,9 @@ public:
 
     /// Returns the maximum value in a sequence of values.
     /// Only available when T is an arithmetic type.
-    template <typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, int> = 0>
+    template <typename U = T>
     T max() const
-    {
+    requires (std::is_arithmetic_v<U>) {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
         return *std::max_element(m_data.begin(), m_data.end());
@@ -676,9 +677,9 @@ public:
 
     /// Returns the minimum value in a sequence of values.
     /// Only available when T is an arithmetic type.
-    template <typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, int> = 0>
+    template <typename U = T>
     T min() const
-    {
+    requires (std::is_arithmetic_v<U>) {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
         return *std::min_element(m_data.begin(), m_data.end());
@@ -686,9 +687,9 @@ public:
 
     /// Computes the sum of a sequence of numeric values.
     /// Only available when T is an arithmetic type.
-    template <typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, int> = 0>
+    template <typename U = T>
     T sum() const
-    {
+    requires (std::is_arithmetic_v<U>) {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
         return std::accumulate(m_data.begin(), m_data.end(), static_cast<T>(0));
