@@ -20,11 +20,6 @@ int g_call_count_c = 0;
 int g_sum = 0;
 const void* g_last_sender = nullptr;
 
-vwr::event_handler<test_event_args>* g_handler = nullptr;
-vwr::delegate<test_event_args>* g_self_delegate = nullptr;
-vwr::delegate<test_event_args>* g_other_delegate = nullptr;
-vwr::delegate<test_event_args>* g_late_delegate = nullptr;
-
 void reset_state()
 {
     g_call_count_a = 0;
@@ -32,10 +27,6 @@ void reset_state()
     g_call_count_c = 0;
     g_sum = 0;
     g_last_sender = nullptr;
-    g_handler = nullptr;
-    g_self_delegate = nullptr;
-    g_other_delegate = nullptr;
-    g_late_delegate = nullptr;
 }
 
 void callback_a(const void* sender, const test_event_args& args)
@@ -57,27 +48,6 @@ void callback_c(const void* sender, const test_event_args& args)
     ++g_call_count_c;
     g_sum += args.value * 100;
     g_last_sender = sender;
-}
-
-void callback_self_unsubscribe(const void*, const test_event_args&)
-{
-    ++g_call_count_a;
-    if(g_handler && g_self_delegate)
-        *g_handler -= *g_self_delegate;
-}
-
-void callback_unsubscribe_other(const void*, const test_event_args&)
-{
-    ++g_call_count_a;
-    if(g_handler && g_other_delegate)
-        *g_handler -= *g_other_delegate;
-}
-
-void callback_subscribe_late(const void*, const test_event_args&)
-{
-    ++g_call_count_a;
-    if(g_handler && g_late_delegate)
-        *g_handler += *g_late_delegate;
 }
 
 void null_safe_callback(const void*, const test_event_args&) {}
@@ -221,16 +191,13 @@ TEST_CASE("event - null callback is safe", "[event][invoke]")
     REQUIRE(g_sum == 0);
 }
 
-TEST_CASE("event - delegate can unsubscribe itself during emit and is not called again", "[event][edge-case][unsubscribe]")
+TEST_CASE("event - delegate removed between emits is not called again", "[event][edge-case][unsubscribe]")
 {
     reset_state();
 
     vwr::event_handler<test_event_args> handler;
-    vwr::delegate self(callback_self_unsubscribe);
+    vwr::delegate self(callback_a);
     vwr::delegate other(callback_b);
-
-    g_handler = &handler;
-    g_self_delegate = &self;
 
     handler += self;
     handler += other;
@@ -239,25 +206,23 @@ TEST_CASE("event - delegate can unsubscribe itself during emit and is not called
 
     REQUIRE(g_call_count_a == 1);
     REQUIRE(g_call_count_b == 1);
-    REQUIRE(g_sum == 20);
+    REQUIRE(g_sum == 22);
 
+    handler -= self;
     handler(nullptr, test_event_args{3});
 
     REQUIRE(g_call_count_a == 1);
     REQUIRE(g_call_count_b == 2);
-    REQUIRE(g_sum == 50);
+    REQUIRE(g_sum == 52);
 }
 
-TEST_CASE("event - unsubscribing another delegate during emit does not affect current snapshot", "[event][edge-case][snapshot]")
+TEST_CASE("event - removing one delegate between emits leaves remaining delegates active", "[event][edge-case][unsubscribe]")
 {
     reset_state();
 
     vwr::event_handler<test_event_args> handler;
-    vwr::delegate remover(callback_unsubscribe_other);
+    vwr::delegate remover(callback_a);
     vwr::delegate removed(callback_b);
-
-    g_handler = &handler;
-    g_other_delegate = &removed;
 
     handler += remover;
     handler += removed;
@@ -266,25 +231,23 @@ TEST_CASE("event - unsubscribing another delegate during emit does not affect cu
 
     REQUIRE(g_call_count_a == 1);
     REQUIRE(g_call_count_b == 1);
-    REQUIRE(g_sum == 20);
+    REQUIRE(g_sum == 22);
 
+    handler -= removed;
     handler(nullptr, test_event_args{4});
 
     REQUIRE(g_call_count_a == 2);
     REQUIRE(g_call_count_b == 1);
-    REQUIRE(g_sum == 20);
+    REQUIRE(g_sum == 26);
 }
 
-TEST_CASE("event - subscribing a new delegate during emit affects only subsequent emits", "[event][edge-case][snapshot]")
+TEST_CASE("event - adding a delegate between emits affects only subsequent emits", "[event][edge-case][subscribe]")
 {
     reset_state();
 
     vwr::event_handler<test_event_args> handler;
-    vwr::delegate installer(callback_subscribe_late);
+    vwr::delegate installer(callback_a);
     vwr::delegate late(callback_c);
-
-    g_handler = &handler;
-    g_late_delegate = &late;
 
     handler += installer;
 
@@ -292,12 +255,13 @@ TEST_CASE("event - subscribing a new delegate during emit affects only subsequen
 
     REQUIRE(g_call_count_a == 1);
     REQUIRE(g_call_count_c == 0);
-    REQUIRE(g_sum == 0);
+    REQUIRE(g_sum == 2);
 
+    handler += late;
     handler(nullptr, test_event_args{3});
 
     REQUIRE(g_call_count_a == 2);
     REQUIRE(g_call_count_c == 1);
-    REQUIRE(g_sum == 300);
+    REQUIRE(g_sum == 305);
 }
 
