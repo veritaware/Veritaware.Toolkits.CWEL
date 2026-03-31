@@ -16,7 +16,6 @@
 // ---------------------------------------------------------------------------
 // Constructors and get()
 // ---------------------------------------------------------------------------
-
 TEST_CASE("query - construction and get", "[query][constructor]")
 {
     SECTION("construct from vector")
