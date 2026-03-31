@@ -11,6 +11,7 @@ FetchContent_MakeAvailable(Catch2)
 add_executable(cwel_tests
     test_query.cpp
     test_event.cpp
+    test_property.cpp
 )
 target_link_libraries(cwel_tests PRIVATE cwel Catch2::Catch2WithMain)
 target_compile_options(
