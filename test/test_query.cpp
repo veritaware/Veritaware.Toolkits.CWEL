@@ -1,4 +1,4 @@
-/* Unit tests for vwr::query<T>
+/* Unit tests for vwr::Query<T>
  * Copyright (c) 2026 Veritaware
  * SPDX-License-Identifier: Zlib
  */
@@ -14,315 +14,315 @@
 #include <vector>
 
 // ---------------------------------------------------------------------------
-// Constructors and get()
+// Constructors and Get()
 // ---------------------------------------------------------------------------
-TEST_CASE("query - construction and get", "[query][constructor]")
+TEST_CASE("Query - Construction and Get", "[Query][Constructor]")
 {
-    SECTION("construct from vector")
+    SECTION("Construct from vector")
     {
-        std::vector<int> v = {1, 2, 3};
-        vwr::query<int> q(v);
-        REQUIRE(q.get() == v);
+        std::vector v = {1, 2, 3};
+        vwr::Query q(v);
+        REQUIRE(q.Get() == v);
     }
 
-    SECTION("construct from initializer list")
+    SECTION("Construct from initializer list")
     {
-        vwr::query<int> q{10, 20, 30};
-        REQUIRE(q.get() == std::vector<int>{10, 20, 30});
+        vwr::Query q{10, 20, 30};
+        REQUIRE(q.Get() == std::vector<int>{10, 20, 30});
     }
 
-    SECTION("construct from iterator range")
+    SECTION("Construct from iterator range")
     {
-        std::vector<int> v = {4, 5, 6};
-        vwr::query<int> q(v.begin(), v.end());
-        REQUIRE(q.get() == v);
+        std::vector v = {4, 5, 6};
+        vwr::Query<int> q(v.begin(), v.end());
+        REQUIRE(q.Get() == v);
     }
 
-    SECTION("construct from empty vector")
+    SECTION("Construct from empty vector")
     {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE(q.get().empty());
+        vwr::Query q(std::vector<int>{});
+        REQUIRE(q.Get().empty());
     }
 
-    SECTION("get returns a copy, not a reference")
+        SECTION("Get returns a copy, not a reference")
     {
-        vwr::query<int> q{1, 2, 3};
-        auto copy = q.get();
+        vwr::Query q{1, 2, 3};
+        auto copy = q.Get();
         copy.push_back(4);
-        REQUIRE(q.get().size() == 3);
+        REQUIRE(q.Get().size() == 3);
     }
 }
 
 // ---------------------------------------------------------------------------
-// aggregate
+// Aggregate
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - aggregate", "[query][aggregate]")
+TEST_CASE("Query - Aggregate", "[Query][Aggregate]")
 {
-    SECTION("aggregate with seed")
+    SECTION("Aggregate with seed")
     {
-        vwr::query<int> q{1, 2, 3, 4};
-        int result = q.aggregate(0, [](int acc, int v) { return acc + v; });
+        vwr::Query q{1, 2, 3, 4};
+        int result = q.Aggregate(0, [](const int acc, const int v) { return acc + v; });
         REQUIRE(result == 10);
     }
 
-    SECTION("aggregate with seed uses seed as initial value")
+    SECTION("Aggregate with seed uses seed as initial value")
     {
-        vwr::query<int> q{1, 2, 3};
-        int result = q.aggregate(10, [](int acc, int v) { return acc + v; });
+        vwr::Query q{1, 2, 3};
+        int result = q.Aggregate(10, [](const int acc, const int v) { return acc + v; });
         REQUIRE(result == 16);
     }
 
-    SECTION("aggregate without seed uses first element")
+    SECTION("Aggregate without seed uses first element")
     {
-        vwr::query<int> q{1, 2, 3, 4};
-        int result = q.aggregate([](int acc, int v) { return acc + v; });
+        vwr::Query q{1, 2, 3, 4};
+        int result = q.Aggregate([](const int acc, const int v) { return acc + v; });
         REQUIRE(result == 10);
     }
 
-    SECTION("aggregate without seed on single element returns that element")
+    SECTION("Aggregate without seed on single element returns that element")
     {
-        vwr::query<int> q{42};
-        REQUIRE(q.aggregate([](int acc, int v) { return acc + v; }) == 42);
+        vwr::Query q{42};
+        REQUIRE(q.Aggregate([](int acc, int v) { return acc + v; }) == 42);
     }
 
-    SECTION("aggregate without seed throws on empty sequence")
+    SECTION("Aggregate without seed throws on empty sequence")
     {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE_THROWS_AS(q.aggregate([](int acc, int v) { return acc + v; }), std::out_of_range);
+        vwr::Query q(std::vector<int>{});
+        REQUIRE_THROWS_AS(q.Aggregate([](const int acc, const int v) { return acc + v; }), std::out_of_range);
     }
 
-    SECTION("aggregate with seed on empty sequence returns seed")
+    SECTION("Aggregate with seed on empty sequence returns seed")
     {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE(q.aggregate(99, [](int acc, int v) { return acc + v; }) == 99);
-    }
-}
-
-// ---------------------------------------------------------------------------
-// first / first_or_default
-// ---------------------------------------------------------------------------
-
-TEST_CASE("query - first", "[query][first]")
-{
-    SECTION("first returns the first element")
-    {
-        vwr::query<int> q{10, 20, 30};
-        REQUIRE(q.first() == 10);
-    }
-
-    SECTION("first throws on empty sequence")
-    {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE_THROWS_AS(q.first(), std::out_of_range);
-    }
-
-    SECTION("first on const query returns first element")
-    {
-        const vwr::query<int> q{5, 6, 7};
-        REQUIRE(q.first() == 5);
-    }
-
-    SECTION("first_or_default returns first element when non-empty")
-    {
-        vwr::query<int> q{3, 1, 4};
-        REQUIRE(q.first_or_default() == 3);
-    }
-
-    SECTION("first_or_default returns default when empty")
-    {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE(q.first_or_default() == 0);
-    }
-
-    SECTION("first_or_default returns default-constructed value for strings")
-    {
-        vwr::query<std::string> q(std::vector<std::string>{});
-        REQUIRE(q.first_or_default().empty());
+        vwr::Query q(std::vector<int>{});
+        REQUIRE(q.Aggregate(99, [](int acc, int v) { return acc + v; }) == 99);
     }
 }
 
 // ---------------------------------------------------------------------------
-// last / last_or_default
+// First / FirstOrDefault
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - last", "[query][last]")
+TEST_CASE("Query - First", "[Query][First]")
 {
-    SECTION("last returns the last element")
+    SECTION("First returns the first element")
     {
-        vwr::query<int> q{10, 20, 30};
-        REQUIRE(q.last() == 30);
+        vwr::Query q{10, 20, 30};
+        REQUIRE(q.First() == 10);
     }
 
-    SECTION("last throws on empty sequence")
+    SECTION("First throws on empty sequence")
     {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE_THROWS_AS(q.last(), std::out_of_range);
+        vwr::Query q(std::vector<int>{});
+        REQUIRE_THROWS_AS(q.First(), std::out_of_range);
     }
 
-    SECTION("last on const query returns last element")
+    SECTION("First on const Query returns first element")
     {
-        const vwr::query<int> q{5, 6, 7};
-        REQUIRE(q.last() == 7);
+        const vwr::Query q{5, 6, 7};
+        REQUIRE(q.First() == 5);
     }
 
-    SECTION("last_or_default returns last element when non-empty")
+    SECTION("FirstOrDefault returns first element when non-empty")
     {
-        vwr::query<int> q{3, 1, 4};
-        REQUIRE(q.last_or_default() == 4);
+        vwr::Query q{3, 1, 4};
+        REQUIRE(q.FirstOrDefault() == 3);
     }
 
-    SECTION("last_or_default returns default when empty")
+    SECTION("FirstOrDefault returns default when empty")
     {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE(q.last_or_default() == 0);
+        vwr::Query q(std::vector<int>{});
+        REQUIRE(q.FirstOrDefault() == 0);
+    }
+
+    SECTION("FirstOrDefault returns default-constructed value for strings")
+    {
+        vwr::Query q(std::vector<std::string>{});
+        REQUIRE(q.FirstOrDefault().empty());
     }
 }
 
 // ---------------------------------------------------------------------------
-// single / single_or_default
+// Last / LastOrDefault
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - single", "[query][single]")
+TEST_CASE("Query - Last", "[Query][Last]")
 {
-    SECTION("single returns the only element")
+    SECTION("Last returns the last element")
     {
-        vwr::query<int> q{42};
-        REQUIRE(q.single() == 42);
+        vwr::Query q{10, 20, 30};
+        REQUIRE(q.Last() == 30);
     }
 
-    SECTION("single throws on empty sequence")
+    SECTION("Last throws on empty sequence")
     {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE_THROWS_AS(q.single(), std::out_of_range);
+        vwr::Query q(std::vector<int>{});
+        REQUIRE_THROWS_AS(q.Last(), std::out_of_range);
     }
 
-    SECTION("single throws when more than one element")
+    SECTION("Last on const Query returns last element")
     {
-        vwr::query<int> q{1, 2};
-        REQUIRE_THROWS_AS(q.single(), std::out_of_range);
+        const vwr::Query q{5, 6, 7};
+        REQUIRE(q.Last() == 7);
     }
 
-    SECTION("single on const query")
+    SECTION("LastOrDefault returns last element when non-empty")
     {
-        const vwr::query<int> q{7};
-        REQUIRE(q.single() == 7);
+        vwr::Query q{3, 1, 4};
+        REQUIRE(q.LastOrDefault() == 4);
     }
 
-    SECTION("single_or_default returns the only element")
+    SECTION("LastOrDefault returns default when empty")
     {
-        vwr::query<int> q{99};
-        REQUIRE(q.single_or_default() == 99);
-    }
-
-    SECTION("single_or_default returns default on empty sequence")
-    {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE(q.single_or_default() == 0);
-    }
-
-    SECTION("single_or_default throws when more than one element")
-    {
-        vwr::query<int> q{1, 2};
-        REQUIRE_THROWS_AS(q.single_or_default(), std::out_of_range);
+        vwr::Query q(std::vector<int>{});
+        REQUIRE(q.LastOrDefault() == 0);
     }
 }
 
 // ---------------------------------------------------------------------------
-// cast
+// Single / SingleOrDefault
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - cast", "[query][cast]")
+TEST_CASE("Query - Single", "[Query][Single]")
 {
-    SECTION("cast int to double")
+    SECTION("Single returns the only element")
     {
-        vwr::query<int> q{1, 2, 3};
-        auto result = q.cast<double>().get();
+        vwr::Query q{42};
+        REQUIRE(q.Single() == 42);
+    }
+
+    SECTION("Single throws on empty sequence")
+    {
+        vwr::Query q(std::vector<int>{});
+        REQUIRE_THROWS_AS(q.Single(), std::out_of_range);
+    }
+
+    SECTION("Single throws when more than one element")
+    {
+        vwr::Query q{1, 2};
+        REQUIRE_THROWS_AS(q.Single(), std::out_of_range);
+    }
+
+    SECTION("Single on const Query")
+    {
+        const vwr::Query q{7};
+        REQUIRE(q.Single() == 7);
+    }
+
+    SECTION("SingleOrDefault returns the only element")
+    {
+        vwr::Query q{99};
+        REQUIRE(q.SingleOrDefault() == 99);
+    }
+
+    SECTION("SingleOrDefault returns default on empty sequence")
+    {
+        vwr::Query q(std::vector<int>{});
+        REQUIRE(q.SingleOrDefault() == 0);
+    }
+
+    SECTION("SingleOrDefault throws when more than one element")
+    {
+        vwr::Query q{1, 2};
+        REQUIRE_THROWS_AS(q.SingleOrDefault(), std::out_of_range);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Cast
+// ---------------------------------------------------------------------------
+
+TEST_CASE("Query - Cast", "[Query][Cast]")
+{
+    SECTION("Cast int to double")
+    {
+        vwr::Query q{1, 2, 3};
+        auto result = q.Cast<double>().Get();
         REQUIRE(result == std::vector<double>{1.0, 2.0, 3.0});
     }
 
-    SECTION("cast int to float")
+    SECTION("Cast int to float")
     {
-        vwr::query<int> q{4, 5};
-        auto result = q.cast<float>().get();
+        vwr::Query q{4, 5};
+        auto result = q.Cast<float>().Get();
         REQUIRE(result == std::vector<float>{4.0F, 5.0F});
     }
 
-    SECTION("cast to same type produces equal sequence")
+    SECTION("Cast to same type produces equal sequence")
     {
-        vwr::query<int> q{7, 8, 9};
-        REQUIRE(q.cast<int>().get() == std::vector<int>{7, 8, 9});
+        vwr::Query q{7, 8, 9};
+        REQUIRE(q.Cast<int>().Get() == std::vector<int>{7, 8, 9});
     }
 
-    SECTION("cast on empty sequence returns empty query")
+    SECTION("Cast on empty sequence returns empty Query")
     {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE(q.cast<double>().get().empty());
-    }
-}
-
-// ---------------------------------------------------------------------------
-// concat
-// ---------------------------------------------------------------------------
-
-TEST_CASE("query - concat", "[query][concat]")
-{
-    SECTION("concat joins two non-empty sequences")
-    {
-        vwr::query<int> a{1, 2, 3};
-        vwr::query<int> b{4, 5, 6};
-        REQUIRE(a.concat(b).get() == std::vector<int>{1, 2, 3, 4, 5, 6});
-    }
-
-    SECTION("concat with empty right sequence returns left")
-    {
-        vwr::query<int> a{1, 2};
-        vwr::query<int> b(std::vector<int>{});
-        REQUIRE(a.concat(b).get() == std::vector<int>{1, 2});
-    }
-
-    SECTION("concat with empty left sequence returns right")
-    {
-        vwr::query<int> a(std::vector<int>{});
-        vwr::query<int> b{3, 4};
-        REQUIRE(a.concat(b).get() == std::vector<int>{3, 4});
-    }
-
-    SECTION("concat preserves duplicates")
-    {
-        vwr::query<int> a{1, 2};
-        vwr::query<int> b{2, 3};
-        REQUIRE(a.concat(b).get() == std::vector<int>{1, 2, 2, 3});
+        vwr::Query q(std::vector<int>{});
+        REQUIRE(q.Cast<double>().Get().empty());
     }
 }
 
 // ---------------------------------------------------------------------------
-// distinct
+// Concat
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - distinct", "[query][distinct]")
+TEST_CASE("Query - Concat", "[Query][Concat]")
 {
-    SECTION("distinct removes duplicate ints")
+    SECTION("Concat joins two non-empty sequences")
     {
-        vwr::query<int> q{1, 2, 2, 3, 1};
-        REQUIRE(q.distinct().get() == std::vector<int>{1, 2, 3});
+        vwr::Query a{1, 2, 3};
+        vwr::Query b{4, 5, 6};
+        REQUIRE(a.Concat(b).Get() == std::vector<int>{1, 2, 3, 4, 5, 6});
     }
 
-    SECTION("distinct on already-unique sequence returns same sequence")
+    SECTION("Concat with empty right sequence returns left")
     {
-        vwr::query<int> q{4, 5, 6};
-        REQUIRE(q.distinct().get() == std::vector<int>{4, 5, 6});
+        vwr::Query a{1, 2};
+        vwr::Query b(std::vector<int>{});
+        REQUIRE(a.Concat(b).Get() == std::vector<int>{1, 2});
     }
 
-    SECTION("distinct on empty sequence returns empty")
+    SECTION("Concat with empty left sequence returns right")
     {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE(q.distinct().get().empty());
+        vwr::Query a(std::vector<int>{});
+        vwr::Query b{3, 4};
+        REQUIRE(a.Concat(b).Get() == std::vector<int>{3, 4});
     }
 
-    SECTION("distinct with custom comparer (case-insensitive strings)")
+    SECTION("Concat preserves duplicates")
     {
-        vwr::query<std::string> q{"hello", "HELLO", "world"};
+        vwr::Query a{1, 2};
+        vwr::Query b{2, 3};
+        REQUIRE(a.Concat(b).Get() == std::vector<int>{1, 2, 2, 3});
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Distinct
+// ---------------------------------------------------------------------------
+
+TEST_CASE("Query - Distinct", "[Query][Distinct]")
+{
+    SECTION("Distinct removes duplicate ints")
+    {
+        vwr::Query q{1, 2, 2, 3, 1};
+        REQUIRE(q.Distinct().Get() == std::vector<int>{1, 2, 3});
+    }
+
+    SECTION("Distinct on already-unique sequence returns same sequence")
+    {
+        vwr::Query q{4, 5, 6};
+        REQUIRE(q.Distinct().Get() == std::vector<int>{4, 5, 6});
+    }
+
+    SECTION("Distinct on empty sequence returns empty")
+    {
+        vwr::Query q(std::vector<int>{});
+        REQUIRE(q.Distinct().Get().empty());
+    }
+
+    SECTION("Distinct with custom comparer (case-insensitive strings)")
+    {
+        vwr::Query<std::string> q{"hello", "HELLO", "world"};
         auto ci = [](const std::string& a, const std::string& b)
         {
             if(a.size() != b.size())
@@ -332,231 +332,231 @@ TEST_CASE("query - distinct", "[query][distinct]")
                     return false;
             return true;
         };
-        auto result = q.distinct(ci).get();
+        auto result = q.Distinct(ci).Get();
         REQUIRE(result == std::vector<std::string>{"hello", "world"});
     }
 }
 
 // ---------------------------------------------------------------------------
-// except
+// Except
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - except", "[query][except]")
+TEST_CASE("Query - Except", "[Query][Except]")
 {
-    SECTION("except removes elements present in the other sequence")
+    SECTION("Except removes elements present in the other sequence")
     {
-        vwr::query<int> a{1, 2, 3, 4};
-        vwr::query<int> b{2, 4};
-        REQUIRE(a.except(b).get() == std::vector<int>{1, 3});
+        vwr::Query a{1, 2, 3, 4};
+        vwr::Query b{2, 4};
+        REQUIRE(a.Except(b).Get() == std::vector<int>{1, 3});
     }
 
-    SECTION("except with no overlap returns all unique elements of left")
+    SECTION("Except with no overlap returns all unique elements of left")
     {
-        vwr::query<int> a{1, 2, 3};
-        vwr::query<int> b{4, 5};
-        REQUIRE(a.except(b).get() == std::vector<int>{1, 2, 3});
+        vwr::Query a{1, 2, 3};
+        vwr::Query b{4, 5};
+        REQUIRE(a.Except(b).Get() == std::vector<int>{1, 2, 3});
     }
 
-    SECTION("except with full overlap returns empty")
+    SECTION("Except with full overlap returns empty")
     {
-        vwr::query<int> a{1, 2};
-        vwr::query<int> b{1, 2, 3};
-        REQUIRE(a.except(b).get().empty());
+        vwr::Query a{1, 2};
+        vwr::Query b{1, 2, 3};
+        REQUIRE(a.Except(b).Get().empty());
     }
 
-    SECTION("except deduplicates the result")
+    SECTION("Except deduplicates the result")
     {
-        vwr::query<int> a{1, 1, 2, 3};
-        vwr::query<int> b{3};
-        REQUIRE(a.except(b).get() == std::vector<int>{1, 2});
+        vwr::Query a{1, 1, 2, 3};
+        vwr::Query b{3};
+        REQUIRE(a.Except(b).Get() == std::vector<int>{1, 2});
     }
 
-    SECTION("except on empty left sequence returns empty")
+    SECTION("Except on empty left sequence returns empty")
     {
-        vwr::query<int> a(std::vector<int>{});
-        vwr::query<int> b{1, 2};
-        REQUIRE(a.except(b).get().empty());
+        vwr::Query a(std::vector<int>{});
+        vwr::Query b{1, 2};
+        REQUIRE(a.Except(b).Get().empty());
     }
 
-    SECTION("except with custom comparer")
+    SECTION("Except with custom comparer")
     {
-        vwr::query<int> a{1, 2, 3, 4};
-        vwr::query<int> b{3, 4, 5};
-        auto eq = [](int x, int y) { return x == y; };
-        REQUIRE(a.except(b, eq).get() == std::vector<int>{1, 2});
+        vwr::Query a{1, 2, 3, 4};
+        vwr::Query b{3, 4, 5};
+        auto eq = [](const int x, const int y) { return x == y; };
+        REQUIRE(a.Except(b, eq).Get() == std::vector<int>{1, 2});
     }
 }
 
 // ---------------------------------------------------------------------------
-// intersect
+// Intersect
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - intersect", "[query][intersect]")
+TEST_CASE("Query - Intersect", "[Query][Intersect]")
 {
-    SECTION("intersect returns common elements")
+    SECTION("Intersect returns common elements")
     {
-        vwr::query<int> a{1, 2, 3, 4};
-        vwr::query<int> b{2, 4, 6};
-        REQUIRE(a.intersect(b).get() == std::vector<int>{2, 4});
+        vwr::Query a{1, 2, 3, 4};
+        vwr::Query b{2, 4, 6};
+        REQUIRE(a.Intersect(b).Get() == std::vector<int>{2, 4});
     }
 
-    SECTION("intersect with no overlap returns empty")
+    SECTION("Intersect with no overlap returns empty")
     {
-        vwr::query<int> a{1, 2};
-        vwr::query<int> b{3, 4};
-        REQUIRE(a.intersect(b).get().empty());
+        vwr::Query a{1, 2};
+        vwr::Query b{3, 4};
+        REQUIRE(a.Intersect(b).Get().empty());
     }
 
-    SECTION("intersect deduplicates the result")
+    SECTION("Intersect deduplicates the result")
     {
-        vwr::query<int> a{1, 1, 2};
-        vwr::query<int> b{1};
-        REQUIRE(a.intersect(b).get() == std::vector<int>{1});
+        vwr::Query a{1, 1, 2};
+        vwr::Query b{1};
+        REQUIRE(a.Intersect(b).Get() == std::vector<int>{1});
     }
 
-    SECTION("intersect on empty left returns empty")
+    SECTION("Intersect on empty left returns empty")
     {
-        vwr::query<int> a(std::vector<int>{});
-        vwr::query<int> b{1, 2};
-        REQUIRE(a.intersect(b).get().empty());
+        vwr::Query a(std::vector<int>{});
+        vwr::Query b{1, 2};
+        REQUIRE(a.Intersect(b).Get().empty());
     }
 
-    SECTION("intersect with custom comparer")
+    SECTION("Intersect with custom comparer")
     {
-        vwr::query<int> a{1, 2, 3};
-        vwr::query<int> b{2, 3, 4};
-        auto eq = [](int x, int y) { return x == y; };
-        REQUIRE(a.intersect(b, eq).get() == std::vector<int>{2, 3});
+        vwr::Query a{1, 2, 3};
+        vwr::Query b{2, 3, 4};
+        auto eq = [](const int x, const int y) { return x == y; };
+        REQUIRE(a.Intersect(b, eq).Get() == std::vector<int>{2, 3});
     }
 }
 
 // ---------------------------------------------------------------------------
-// join
+// Join
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - join", "[query][join]")
+TEST_CASE("Query - Join", "[Query][Join]")
 {
-    SECTION("join correlates matching keys")
+    SECTION("Join correlates matching keys")
     {
-        vwr::query<int> outer{1, 2, 3};
-        vwr::query<int> inner{2, 3, 4};
-        auto result = outer.join(
+        vwr::Query outer{1, 2, 3};
+        vwr::Query inner{2, 3, 4};
+        auto result = outer.Join(
                                 inner,
-                                [](int x) { return x; },
-                                [](int y) { return y; })
-                          .get();
+                                [](const int x) { return x; },
+                                [](const int y) { return y; })
+                          .Get();
         REQUIRE(result == (std::vector<std::pair<int, int>>{{2, 2}, {3, 3}}));
     }
 
-    SECTION("join with no matching keys returns empty")
+    SECTION("Join with no matching keys returns empty")
     {
-        vwr::query<int> outer{1, 2};
-        vwr::query<int> inner{3, 4};
-        auto result = outer.join(
+        vwr::Query outer{1, 2};
+        vwr::Query inner{3, 4};
+        auto result = outer.Join(
                                 inner,
-                                [](int x) { return x; },
-                                [](int y) { return y; })
-                          .get();
+                                [](const int x) { return x; },
+                                [](const int y) { return y; })
+                          .Get();
         REQUIRE(result.empty());
     }
 
-    SECTION("join produces a cross-product for repeated keys")
+    SECTION("Join produces a cross-product for repeated keys")
     {
-        vwr::query<int> outer{1, 1};
-        vwr::query<int> inner{1};
-        auto result = outer.join(
+        vwr::Query outer{1, 1};
+        vwr::Query inner{1};
+        auto result = outer.Join(
                                 inner,
-                                [](int x) { return x; },
-                                [](int y) { return y; })
-                          .get();
+                                [](const int x) { return x; },
+                                [](const int y) { return y; })
+                          .Get();
         REQUIRE(result.size() == 2);
     }
 
-    SECTION("join with custom comparer")
+    SECTION("Join with custom comparer")
     {
-        vwr::query<int> outer{2, 4};
-        vwr::query<int> inner{1, 3};
+        vwr::Query outer{2, 4};
+        vwr::Query inner{1, 3};
         // match when outer value is one more than inner value
-        auto eq = [](int inner_key, int outer_key) { return outer_key - inner_key == 1; };
-        auto result = outer.join(
+        auto eq = [](const int innerKey, const int outerKey) { return outerKey - innerKey == 1; };
+        auto result = outer.Join(
                                 inner,
-                                [](int x) { return x; },
-                                [](int y) { return y; },
+                                [](const int x) { return x; },
+                                [](const int y) { return y; },
                                 eq)
-                          .get();
+                          .Get();
         REQUIRE(result == (std::vector<std::pair<int, int>>{{2, 1}, {4, 3}}));
     }
 }
 
 // ---------------------------------------------------------------------------
-// reverse
+// Reverse
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - reverse", "[query][reverse]")
+TEST_CASE("Query - Reverse", "[Query][Reverse]")
 {
-    SECTION("reverse inverts the sequence")
+    SECTION("Reverse inverts the sequence")
     {
-        vwr::query<int> q{1, 2, 3, 4, 5};
-        REQUIRE(q.reverse().get() == std::vector<int>{5, 4, 3, 2, 1});
+        vwr::Query q{1, 2, 3, 4, 5};
+        REQUIRE(q.Reverse().Get() == std::vector<int>{5, 4, 3, 2, 1});
     }
 
-    SECTION("reverse on single element returns same")
+    SECTION("Reverse on single element returns same")
     {
-        vwr::query<int> q{42};
-        REQUIRE(q.reverse().get() == std::vector<int>{42});
+        vwr::Query q{42};
+        REQUIRE(q.Reverse().Get() == std::vector<int>{42});
     }
 
-    SECTION("reverse on empty returns empty")
+    SECTION("Reverse on empty returns empty")
     {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE(q.reverse().get().empty());
+        vwr::Query q(std::vector<int>{});
+        REQUIRE(q.Reverse().Get().empty());
     }
 
-    SECTION("double reverse returns original sequence")
+    SECTION("Double Reverse returns original sequence")
     {
-        vwr::query<int> q{1, 2, 3};
-        REQUIRE(q.reverse().reverse().get() == std::vector<int>{1, 2, 3});
+        vwr::Query q{1, 2, 3};
+        REQUIRE(q.Reverse().Reverse().Get() == std::vector<int>{1, 2, 3});
     }
 }
 
 // ---------------------------------------------------------------------------
-// sequence_equal
+// SequenceEqual
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - sequence_equal", "[query][sequence_equal]")
+TEST_CASE("Query - SequenceEqual", "[Query][SequenceEqual]")
 {
-    SECTION("equal sequences")
+    SECTION("Equal sequences")
     {
-        vwr::query<int> a{1, 2, 3};
-        vwr::query<int> b{1, 2, 3};
-        REQUIRE(a.sequence_equal(b));
+        vwr::Query a{1, 2, 3};
+        vwr::Query b{1, 2, 3};
+        REQUIRE(a.SequenceEqual(b));
     }
 
-    SECTION("different sizes are not equal")
+    SECTION("Different sizes are not equal")
     {
-        vwr::query<int> a{1, 2};
-        vwr::query<int> b{1, 2, 3};
-        REQUIRE_FALSE(a.sequence_equal(b));
+        vwr::Query a{1, 2};
+        vwr::Query b{1, 2, 3};
+        REQUIRE_FALSE(a.SequenceEqual(b));
     }
 
-    SECTION("same size but different elements")
+    SECTION("Same size but different elements")
     {
-        vwr::query<int> a{1, 2, 3};
-        vwr::query<int> b{1, 2, 4};
-        REQUIRE_FALSE(a.sequence_equal(b));
+        vwr::Query a{1, 2, 3};
+        vwr::Query b{1, 2, 4};
+        REQUIRE_FALSE(a.SequenceEqual(b));
     }
 
-    SECTION("empty sequences are equal")
+    SECTION("Empty sequences are equal")
     {
-        vwr::query<int> a(std::vector<int>{});
-        vwr::query<int> b(std::vector<int>{});
-        REQUIRE(a.sequence_equal(b));
+        vwr::Query a(std::vector<int>{});
+        vwr::Query b(std::vector<int>{});
+        REQUIRE(a.SequenceEqual(b));
     }
 
-    SECTION("sequence_equal with custom comparer")
+        SECTION("SequenceEqual with custom comparer")
     {
-        vwr::query<std::string> a{"Hello", "World"};
-        vwr::query<std::string> b{"hello", "world"};
+        vwr::Query<std::string> a{"Hello", "World"};
+        vwr::Query<std::string> b{"hello", "world"};
         auto ci = [](const std::string& x, const std::string& y)
         {
             if(x.size() != y.size())
@@ -566,356 +566,356 @@ TEST_CASE("query - sequence_equal", "[query][sequence_equal]")
                     return false;
             return true;
         };
-        REQUIRE(a.sequence_equal(b, ci));
+        REQUIRE(a.SequenceEqual(b, ci));
     }
 }
 
 // ---------------------------------------------------------------------------
-// skip_while
+// SkipWhile
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - skip_while", "[query][skip_while]")
+TEST_CASE("Query - SkipWhile", "[Query][SkipWhile]")
 {
-    SECTION("skips elements while predicate is true")
+    SECTION("SkipWhile skips elements while predicate is true")
     {
-        vwr::query<int> q{1, 2, 3, 4, 5};
-        auto result = q.skip_while([](int v) { return v < 3; }).get();
+        vwr::Query q{1, 2, 3, 4, 5};
+        auto result = q.SkipWhile([](const int v) { return v < 3; }).Get();
         REQUIRE(result == std::vector<int>{3, 4, 5});
     }
 
-    SECTION("skips nothing when predicate is false from the start")
+    SECTION("SkipWhile skips nothing when predicate is false from the start")
     {
-        vwr::query<int> q{5, 4, 3};
-        auto result = q.skip_while([](int v) { return v < 3; }).get();
+        vwr::Query q{5, 4, 3};
+        auto result = q.SkipWhile([](const int v) { return v < 3; }).Get();
         REQUIRE(result == std::vector<int>{5, 4, 3});
     }
 
-    SECTION("skips all when predicate is always true")
+    SECTION("SkipWhile skips all when predicate is always true")
     {
-        vwr::query<int> q{1, 2, 3};
-        auto result = q.skip_while([](int) { return true; }).get();
+        vwr::Query q{1, 2, 3};
+        auto result = q.SkipWhile([](int) { return true; }).Get();
         REQUIRE(result.empty());
     }
 
-    SECTION("skip_while does not skip elements after first false")
+    SECTION("SkipWhile does not skip elements after first false")
     {
-        vwr::query<int> q{1, 2, 1, 3};
-        auto result = q.skip_while([](int v) { return v < 2; }).get();
+        vwr::Query q{1, 2, 1, 3};
+        auto result = q.SkipWhile([](const int v) { return v < 2; }).Get();
         REQUIRE(result == std::vector<int>{2, 1, 3});
     }
 }
 
 // ---------------------------------------------------------------------------
-// take_while
+// TakeWhile
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - take_while", "[query][take_while]")
+TEST_CASE("Query - TakeWhile", "[Query][TakeWhile]")
 {
-    SECTION("takes elements while predicate is true")
+    SECTION("TakeWhile takes elements while predicate is true")
     {
-        vwr::query<int> q{1, 2, 3, 4, 5};
-        auto result = q.take_while([](int v) { return v < 4; }).get();
+        vwr::Query q{1, 2, 3, 4, 5};
+        auto result = q.TakeWhile([](const int v) { return v < 4; }).Get();
         REQUIRE(result == std::vector<int>{1, 2, 3});
     }
 
-    SECTION("takes nothing when predicate is false from the start")
+    SECTION("TakeWhile takes nothing when predicate is false from the start")
     {
-        vwr::query<int> q{5, 4, 3};
-        auto result = q.take_while([](int v) { return v < 3; }).get();
+        vwr::Query q{5, 4, 3};
+        auto result = q.TakeWhile([](const int v) { return v < 3; }).Get();
         REQUIRE(result.empty());
     }
 
-    SECTION("takes all when predicate is always true")
+    SECTION("TakeWhile takes all when predicate is always true")
     {
-        vwr::query<int> q{1, 2, 3};
-        auto result = q.take_while([](int) { return true; }).get();
+        vwr::Query q{1, 2, 3};
+        auto result = q.TakeWhile([](int) { return true; }).Get();
         REQUIRE(result == std::vector<int>{1, 2, 3});
     }
 
-    SECTION("take_while stops at first false even if later elements pass")
+    SECTION("TakeWhile stops at first false even if later elements pass")
     {
-        vwr::query<int> q{1, 2, 5, 1, 2};
-        auto result = q.take_while([](int v) { return v < 4; }).get();
+        vwr::Query q{1, 2, 5, 1, 2};
+        auto result = q.TakeWhile([](const int v) { return v < 4; }).Get();
         REQUIRE(result == std::vector<int>{1, 2});
     }
 }
 
 // ---------------------------------------------------------------------------
-// unite
+// Unite
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - unite", "[query][unite]")
+TEST_CASE("Query - Unite", "[Query][Unite]")
 {
-    SECTION("unite merges two sequences keeping only unique elements")
+    SECTION("Unite merges two sequences keeping only unique elements")
     {
-        vwr::query<int> a{1, 2, 3};
-        vwr::query<int> b{2, 3, 4};
-        REQUIRE(a.unite(b).get() == std::vector<int>{1, 2, 3, 4});
+        vwr::Query a{1, 2, 3};
+        vwr::Query b{2, 3, 4};
+        REQUIRE(a.Unite(b).Get() == std::vector<int>{1, 2, 3, 4});
     }
 
-    SECTION("unite with no overlap returns all elements")
+    SECTION("Unite with no overlap returns all elements")
     {
-        vwr::query<int> a{1, 2};
-        vwr::query<int> b{3, 4};
-        REQUIRE(a.unite(b).get() == std::vector<int>{1, 2, 3, 4});
+        vwr::Query a{1, 2};
+        vwr::Query b{3, 4};
+        REQUIRE(a.Unite(b).Get() == std::vector<int>{1, 2, 3, 4});
     }
 
-    SECTION("unite with identical sequences returns unique elements")
+    SECTION("Unite with identical sequences returns unique elements")
     {
-        vwr::query<int> a{1, 2, 3};
-        vwr::query<int> b{1, 2, 3};
-        REQUIRE(a.unite(b).get() == std::vector<int>{1, 2, 3});
+        vwr::Query a{1, 2, 3};
+        vwr::Query b{1, 2, 3};
+        REQUIRE(a.Unite(b).Get() == std::vector<int>{1, 2, 3});
     }
 
-    SECTION("unite with empty sequence returns non-empty unique")
+    SECTION("Unite with empty sequence returns non-empty unique")
     {
-        vwr::query<int> a{1, 1, 2};
-        vwr::query<int> b(std::vector<int>{});
-        REQUIRE(a.unite(b).get() == std::vector<int>{1, 2});
+        vwr::Query a{1, 1, 2};
+        vwr::Query b(std::vector<int>{});
+        REQUIRE(a.Unite(b).Get() == std::vector<int>{1, 2});
     }
 }
 
 // ---------------------------------------------------------------------------
-// where
+// Where
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - where", "[query][where]")
+TEST_CASE("Query - Where", "[Query][Where]")
 {
-    SECTION("where filters elements by predicate")
+    SECTION("Where filters elements by predicate")
     {
-        vwr::query<int> q{1, 2, 3, 4, 5, 6};
-        auto result = q.where([](int v) { return v % 2 == 0; }).get();
+        vwr::Query q{1, 2, 3, 4, 5, 6};
+        auto result = q.Where([](const int v) { return v % 2 == 0; }).Get();
         REQUIRE(result == std::vector<int>{2, 4, 6});
     }
 
-    SECTION("where returns empty when no element satisfies predicate")
+    SECTION("Where returns empty when no element satisfies predicate")
     {
-        vwr::query<int> q{1, 3, 5};
-        auto result = q.where([](int v) { return v % 2 == 0; }).get();
+        vwr::Query q{1, 3, 5};
+        auto result = q.Where([](const int v) { return v % 2 == 0; }).Get();
         REQUIRE(result.empty());
     }
 
-    SECTION("where returns all when all elements satisfy predicate")
+    SECTION("Where returns all when all elements satisfy predicate")
     {
-        vwr::query<int> q{2, 4, 6};
-        auto result = q.where([](int v) { return v % 2 == 0; }).get();
+        vwr::Query q{2, 4, 6};
+        auto result = q.Where([](const int v) { return v % 2 == 0; }).Get();
         REQUIRE(result == std::vector<int>{2, 4, 6});
     }
 
-    SECTION("where on empty sequence returns empty")
+    SECTION("Where on empty sequence returns empty")
     {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE(q.where([](int) { return true; }).get().empty());
+        vwr::Query q(std::vector<int>{});
+        REQUIRE(q.Where([](int) { return true; }).Get().empty());
     }
 }
 
 // ---------------------------------------------------------------------------
-// all / any
+// All / Any
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - all", "[query][all]")
+TEST_CASE("Query - All", "[Query][All]")
 {
-    SECTION("all returns true when all elements satisfy predicate")
+    SECTION("All returns true when all elements satisfy predicate")
     {
-        vwr::query<int> q{2, 4, 6};
-        REQUIRE(q.all([](int v) { return v % 2 == 0; }));
+        const vwr::Query q{2, 4, 6};
+        REQUIRE(q.All([](int v) { return v % 2 == 0; }));
     }
 
-    SECTION("all returns false when at least one element does not satisfy")
+    SECTION("All returns false when at least one element does not satisfy")
     {
-        vwr::query<int> q{2, 3, 6};
-        REQUIRE_FALSE(q.all([](int v) { return v % 2 == 0; }));
+        const vwr::Query q{2, 3, 6};
+        REQUIRE_FALSE(q.All([](int v) { return v % 2 == 0; }));
     }
 
-    SECTION("all on empty sequence returns true (vacuous truth)")
+    SECTION("All on empty sequence returns true (vacuous truth)")
     {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE(q.all([](int) { return false; }));
+        const vwr::Query q(std::vector<int>{});
+        REQUIRE(q.All([](int) { return false; }));
     }
 }
 
-TEST_CASE("query - any", "[query][any]")
+TEST_CASE("Query - Any", "[Query][Any]")
 {
-    SECTION("any returns true when at least one element satisfies predicate")
+    SECTION("Any returns true when at least one element satisfies predicate")
     {
-        vwr::query<int> q{1, 3, 4};
-        REQUIRE(q.any([](int v) { return v % 2 == 0; }));
+        const vwr::Query q{1, 3, 4};
+        REQUIRE(q.Any([](int v) { return v % 2 == 0; }));
     }
 
-    SECTION("any returns false when no element satisfies predicate")
+    SECTION("Any returns false when no element satisfies predicate")
     {
-        vwr::query<int> q{1, 3, 5};
-        REQUIRE_FALSE(q.any([](int v) { return v % 2 == 0; }));
+        const vwr::Query q{1, 3, 5};
+        REQUIRE_FALSE(q.Any([](int v) { return v % 2 == 0; }));
     }
 
-    SECTION("any on empty sequence returns false")
+    SECTION("Any on empty sequence returns false")
     {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE_FALSE(q.any([](int) { return true; }));
-    }
-}
-
-// ---------------------------------------------------------------------------
-// average
-// ---------------------------------------------------------------------------
-
-TEST_CASE("query - average", "[query][average]")
-{
-    SECTION("average of integers returns double")
-    {
-        vwr::query<int> q{1, 2, 3, 4, 5};
-        REQUIRE_THAT(q.average(), Catch::Matchers::WithinRel(3.0, 1e-9));
-    }
-
-    SECTION("average of floats")
-    {
-        vwr::query<float> q{1.0F, 2.0F, 3.0F};
-        REQUIRE_THAT(q.average(), Catch::Matchers::WithinRel(2.0F, 1e-5F));
-    }
-
-    SECTION("average of doubles")
-    {
-        vwr::query<double> q{1.5, 2.5, 3.0};
-        REQUIRE_THAT(q.average(), Catch::Matchers::WithinRel(7.0 / 3.0, 1e-9));
-    }
-
-    SECTION("average throws on empty sequence")
-    {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE_THROWS_AS(q.average(), std::out_of_range);
-    }
-
-    SECTION("average of single element")
-    {
-        vwr::query<int> q{7};
-        REQUIRE_THAT(q.average(), Catch::Matchers::WithinRel(7.0, 1e-9));
+        const vwr::Query q(std::vector<int>{});
+        REQUIRE_FALSE(q.Any([](int) { return true; }));
     }
 }
 
 // ---------------------------------------------------------------------------
-// contains
+// Average
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - contains", "[query][contains]")
+TEST_CASE("Query - Average", "[Query][Average]")
 {
-    SECTION("contains returns true for present element")
+    SECTION("Average of integers returns double")
     {
-        vwr::query<int> q{1, 2, 3};
-        REQUIRE(q.contains(2));
+        vwr::Query q{1, 2, 3, 4, 5};
+        REQUIRE_THAT(q.Average(), Catch::Matchers::WithinRel(3.0, 1e-9));
     }
 
-    SECTION("contains returns false for absent element")
+    SECTION("Average of floats")
     {
-        vwr::query<int> q{1, 2, 3};
-        REQUIRE_FALSE(q.contains(5));
+        vwr::Query q{1.0F, 2.0F, 3.0F};
+        REQUIRE_THAT(q.Average(), Catch::Matchers::WithinRel(2.0F, 1e-5F));
     }
 
-    SECTION("contains on empty sequence returns false")
+    SECTION("Average of doubles")
     {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE_FALSE(q.contains(1));
+        vwr::Query q{1.5, 2.5, 3.0};
+        REQUIRE_THAT(q.Average(), Catch::Matchers::WithinRel(7.0 / 3.0, 1e-9));
     }
 
-    SECTION("contains works with strings")
+    SECTION("Average throws on empty sequence")
     {
-        vwr::query<std::string> q{"foo", "bar", "baz"};
-        REQUIRE(q.contains("bar"));
-        REQUIRE_FALSE(q.contains("qux"));
+        vwr::Query q(std::vector<int>{});
+        REQUIRE_THROWS_AS(q.Average(), std::out_of_range);
+    }
+
+    SECTION("Average of single element")
+    {
+        vwr::Query q{7};
+        REQUIRE_THAT(q.Average(), Catch::Matchers::WithinRel(7.0, 1e-9));
     }
 }
 
 // ---------------------------------------------------------------------------
-// max / min
+// Contains
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - max", "[query][max]")
+TEST_CASE("Query - Contains", "[Query][Contains]")
 {
-    SECTION("max returns maximum element")
+    SECTION("Contains returns true for present element")
     {
-        vwr::query<int> q{3, 1, 4, 1, 5, 9, 2, 6};
-        REQUIRE(q.max() == 9);
+        vwr::Query q{1, 2, 3};
+        REQUIRE(q.Contains(2));
     }
 
-    SECTION("max on single element returns that element")
+    SECTION("Contains returns false for absent element")
     {
-        vwr::query<int> q{42};
-        REQUIRE(q.max() == 42);
+        vwr::Query q{1, 2, 3};
+        REQUIRE_FALSE(q.Contains(5));
     }
 
-    SECTION("max throws on empty sequence")
+    SECTION("Contains on empty sequence returns false")
     {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE_THROWS_AS(q.max(), std::out_of_range);
+        vwr::Query q(std::vector<int>{});
+        REQUIRE_FALSE(q.Contains(1));
     }
 
-    SECTION("max with negative values")
+    SECTION("Contains works with strings")
     {
-        vwr::query<int> q{-5, -3, -1, -4};
-        REQUIRE(q.max() == -1);
-    }
-}
-
-TEST_CASE("query - min", "[query][min]")
-{
-    SECTION("min returns minimum element")
-    {
-        vwr::query<int> q{3, 1, 4, 1, 5, 9, 2, 6};
-        REQUIRE(q.min() == 1);
-    }
-
-    SECTION("min on single element returns that element")
-    {
-        vwr::query<int> q{7};
-        REQUIRE(q.min() == 7);
-    }
-
-    SECTION("min throws on empty sequence")
-    {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE_THROWS_AS(q.min(), std::out_of_range);
-    }
-
-    SECTION("min with negative values")
-    {
-        vwr::query<int> q{-5, -3, -1, -4};
-        REQUIRE(q.min() == -5);
+        vwr::Query<std::string> q{"foo", "bar", "baz"};
+        REQUIRE(q.Contains("bar"));
+        REQUIRE_FALSE(q.Contains("qux"));
     }
 }
 
 // ---------------------------------------------------------------------------
-// sum
+// Max / Min
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - sum", "[query][sum]")
+TEST_CASE("Query - Max", "[Query][Max]")
 {
-    SECTION("sum of integers")
+    SECTION("Max returns maximum element")
     {
-        vwr::query<int> q{1, 2, 3, 4, 5};
-        REQUIRE(q.sum() == 15);
+        vwr::Query q{3, 1, 4, 1, 5, 9, 2, 6};
+        REQUIRE(q.Max() == 9);
     }
 
-    SECTION("sum of doubles")
+    SECTION("Max on single element returns that element")
     {
-        vwr::query<double> q{1.1, 2.2, 3.3};
-        REQUIRE_THAT(q.sum(), Catch::Matchers::WithinRel(6.6, 1e-9));
+        vwr::Query q{42};
+        REQUIRE(q.Max() == 42);
     }
 
-    SECTION("sum throws on empty sequence")
+    SECTION("Max throws on empty sequence")
     {
-        vwr::query<int> q(std::vector<int>{});
-        REQUIRE_THROWS_AS(q.sum(), std::out_of_range);
+        vwr::Query q(std::vector<int>{});
+        REQUIRE_THROWS_AS(q.Max(), std::out_of_range);
     }
 
-    SECTION("sum of single element")
+    SECTION("Max with negative values")
     {
-        vwr::query<int> q{99};
-        REQUIRE(q.sum() == 99);
+        vwr::Query q{-5, -3, -1, -4};
+        REQUIRE(q.Max() == -1);
+    }
+}
+
+TEST_CASE("Query - Min", "[Query][Min]")
+{
+    SECTION("Min returns minimum element")
+    {
+        vwr::Query q{3, 1, 4, 1, 5, 9, 2, 6};
+        REQUIRE(q.Min() == 1);
     }
 
-    SECTION("sum with negative values")
+    SECTION("Min on single element returns that element")
     {
-        vwr::query<int> q{-1, -2, 3};
-        REQUIRE(q.sum() == 0);
+        vwr::Query q{7};
+        REQUIRE(q.Min() == 7);
+    }
+
+    SECTION("Min throws on empty sequence")
+    {
+        vwr::Query q(std::vector<int>{});
+        REQUIRE_THROWS_AS(q.Min(), std::out_of_range);
+    }
+
+    SECTION("Min with negative values")
+    {
+        vwr::Query q{-5, -3, -1, -4};
+        REQUIRE(q.Min() == -5);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Sum
+// ---------------------------------------------------------------------------
+
+TEST_CASE("Query - Sum", "[Query][Sum]")
+{
+    SECTION("Sum of integers")
+    {
+        vwr::Query q{1, 2, 3, 4, 5};
+        REQUIRE(q.Sum() == 15);
+    }
+
+    SECTION("Sum of doubles")
+    {
+        vwr::Query q{1.1, 2.2, 3.3};
+        REQUIRE_THAT(q.Sum(), Catch::Matchers::WithinRel(6.6, 1e-9));
+    }
+
+    SECTION("Sum throws on empty sequence")
+    {
+        vwr::Query q(std::vector<int>{});
+        REQUIRE_THROWS_AS(q.Sum(), std::out_of_range);
+    }
+
+    SECTION("Sum of single element")
+    {
+        vwr::Query q{99};
+        REQUIRE(q.Sum() == 99);
+    }
+
+    SECTION("Sum with negative values")
+    {
+        vwr::Query q{-1, -2, 3};
+        REQUIRE(q.Sum() == 0);
     }
 }
 
@@ -923,32 +923,32 @@ TEST_CASE("query - sum", "[query][sum]")
 // Chaining
 // ---------------------------------------------------------------------------
 
-TEST_CASE("query - method chaining", "[query][chaining]")
+TEST_CASE("Query - Method Chaining", "[Query][Chaining]")
 {
-    SECTION("where then sum")
+    SECTION("Where then Sum")
     {
-        vwr::query<int> q{1, 2, 3, 4, 5, 6};
-        REQUIRE(q.where([](int v) { return v % 2 == 0; }).sum() == 12);
+        vwr::Query q{1, 2, 3, 4, 5, 6};
+        REQUIRE(q.Where([](int v) { return v % 2 == 0; }).Sum() == 12);
     }
 
-    SECTION("where then max")
+    SECTION("Where then Max")
     {
-        vwr::query<int> q{1, 5, 2, 8, 3};
-        REQUIRE(q.where([](int v) { return v < 6; }).max() == 5);
+        vwr::Query q{1, 5, 2, 8, 3};
+        REQUIRE(q.Where([](int v) { return v < 6; }).Max() == 5);
     }
 
-    SECTION("distinct then reverse then get")
+    SECTION("Distinct then Reverse then Get")
     {
-        vwr::query<int> q{3, 1, 2, 1, 3};
-        auto result = q.distinct().reverse().get();
+        vwr::Query q{3, 1, 2, 1, 3};
+        auto result = q.Distinct().Reverse().Get();
         REQUIRE(result == std::vector<int>{2, 1, 3});
     }
 
-    SECTION("concat then where then count via get")
+    SECTION("Concat then Where then count via Get")
     {
-        vwr::query<int> a{1, 2, 3};
-        vwr::query<int> b{4, 5, 6};
-        auto result = a.concat(b).where([](int v) { return v > 3; }).get();
+        vwr::Query a{1, 2, 3};
+        vwr::Query b{4, 5, 6};
+        auto result = a.Concat(b).Where([](const int v) { return v > 3; }).Get();
         REQUIRE(result == std::vector<int>{4, 5, 6});
     }
 }

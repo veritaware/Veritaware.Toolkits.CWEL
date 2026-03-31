@@ -12,76 +12,97 @@ namespace vwr
 {
 
 template <typename T>
-class property_changed_event_args
+class PropertyChangedEventArgs
 {
 public:
-    property_changed_event_args(const T& old_value, const T& new_value)
-        : old_value(old_value), new_value(new_value) {}
-    const T old_value;
-    const T new_value;
+    PropertyChangedEventArgs(const T& oldValue, const T& newValue) // NOLINT(*-easily-swappable-parameters)
+        : OldValue(oldValue), NewValue(newValue) {}
+    const T OldValue;
+    const T NewValue;
+
+#ifdef USE_STL_NAMING
+    const T& old_value() const { return OldValue; }
+    const T& new_value() const { return NewValue; }
+#endif // USE_STL_NAMING
 };
 
 template <typename T>
-class property
+class Property
 {
 public:
-    property() : property_changed(), m_value(), is_initialized(false) {}
-    explicit property(const T& value) : property_changed(), m_value(value), is_initialized(true) {}
+    Property() : PropertyChanged(), m_value(), m_isInitialized(false) {}
+    explicit Property(const T& value) : PropertyChanged(), m_value(value), m_isInitialized(true) {}
 
-    /// Copies the value from other property without copying the event handlers as those are not copyable/movable.
-    explicit property(const property& other) : property_changed(), m_value(other.m_value), is_initialized(other.is_initialized) {}
+    /// Copies the value from another Property without copying the event handlers, as those are not copyable or movable.
+    explicit Property(const Property& other) : PropertyChanged(), m_value(other.m_value), m_isInitialized(other.m_isInitialized) {}
 
-    /// Copies the value from other property without copying the event handlers as those are not copyable/movable
-    /// and raises the property_changed event if the value has changed.
-    property& operator=(const property& other)
+    /// Copies the value from another Property without copying the event handlers, as those are not copyable or movable,
+    /// and raises the PropertyChanged event if the value has changed.
+    Property& operator=(const Property& other)
     {
         if(this != &other)
-            set(other.m_value);
+            Set(other.m_value);
         return *this;
     }
 
     /// Disabled due to event handlers not being movable.
-    explicit property(property&& other) = delete;
+    explicit Property(Property&& other) = delete;
     /// Disabled due to event handlers not being movable.
-    property& operator=(property&& other) = delete;
+    Property& operator=(Property&& other) = delete;
 
-    /// Returns the property value.
-    const T& get() const { return m_value; }
+    /// Returns the Property value.
+    const T& Get() const { return m_value; }
 
-    /// Returns the property value.
+    /// Returns the Property value.
     const T& operator()() const { return m_value; }
 
-    /// Sets the property value and raises the property_changed event if the value has changed.
-    /// The property_changed event is not raised if the value is being initialized for the first time.
-    void set(const T& value)
+    /// Sets the Property value and raises the PropertyChanged event if the value has changed.
+    /// The PropertyChanged event is not raised if the value is being initialized for the first time.
+    void Set(const T& value)
     {
-        if(!is_initialized)
+        if(!m_isInitialized)
         {
             m_value = value;
+            m_isInitialized = true;
             return;
         }
         if(m_value == value)
             return;
-        property_changed_event_args<T> event_args(m_value, value);
+        PropertyChangedEventArgs<T> eventArgs(m_value, value);
         m_value = value;
-        property_changed(this, event_args);
+        PropertyChanged(this, eventArgs);
     }
 
-    /// Sets the property value and raises the property_changed event if the value has changed.
-    /// The property_changed event is not raised if the value is being initialized for the first time.
-    property& operator=(const T& value)
+    /// Sets the Property value and raises the PropertyChanged event if the value has changed.
+    /// The PropertyChanged event is not raised if the value is being initialized for the first time.
+    Property& operator=(const T& value)
     {
-        set(value);
+        Set(value);
         return *this;
     }
 
-    /// Event called when the property value has changed from its previous state.
-    /// The property value must NOT be modified in the property_changed event callback, as it will cause a deadlock.
-    event_handler<property_changed_event_args<T>> property_changed;
+    /// Event called when the Property value has changed from its previous state.
+    /// The Property value must NOT be modified in the PropertyChanged callback, as it will cause a deadlock.
+    EventHandler<PropertyChangedEventArgs<T>> PropertyChanged;
+
+#ifdef USE_STL_NAMING
+    const T& get() const { return Get(); }
+    void set(const T& value) { Set(value); }
+    auto& property_changed() { return PropertyChanged; }
+    const auto& property_changed() const { return PropertyChanged; }
+#endif // USE_STL_NAMING
 private:
     T m_value;
-    bool is_initialized;
+    bool m_isInitialized;
 };
+
+#ifdef USE_STL_NAMING
+template <typename T>
+using prop_ch_ev_args = PropertyChangedEventArgs<T>;
+
+template <typename T>
+using property = Property<T>;
+#endif // USE_STL_NAMING
 
 } // namespace vwr
 

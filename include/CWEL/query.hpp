@@ -22,69 +22,69 @@ namespace vwr
 
 namespace detail
 {
-    template <typename U, typename = void>
-    struct is_hashable : std::false_type {};
+    template <typename, typename = void>
+    struct IsHashable : std::false_type {};
 
     template <typename U>
-    struct is_hashable<U, std::void_t<decltype(std::hash<U>{}(std::declval<const U&>()))>> : std::true_type {};
+    struct IsHashable<U, std::void_t<decltype(std::hash<U>{}(std::declval<const U&>()))>> : std::true_type {};
 
     template <typename U>
-    inline constexpr bool is_hashable_v = is_hashable<U>::value;
+    inline constexpr bool IsHashableV = IsHashable<U>::value;
 
-    template <typename U, typename = void>
-    struct is_equality_comparable : std::false_type {};
+    template <typename, typename = void>
+    struct IsEqualityComparable : std::false_type {};
 
     template <typename U>
-    struct is_equality_comparable<U, std::void_t<
+    struct IsEqualityComparable<U, std::void_t<
         decltype(std::equal_to<U>{}(std::declval<const U&>(), std::declval<const U&>()))
     >> : std::true_type {};
 
     template <typename U>
-    inline constexpr bool can_use_unordered_set_v = is_hashable_v<U> && is_equality_comparable<U>::value;
+    inline constexpr bool CanUseUnorderedSetV = IsHashableV<U> && IsEqualityComparable<U>::value;
 
     template <typename, typename, typename = void>
-    struct is_equality_comparable_with : std::false_type {};
+    struct IsEqualityComparableWith : std::false_type {};
 
     template <typename Left, typename Right>
-    struct is_equality_comparable_with<Left, Right, std::void_t<
+    struct IsEqualityComparableWith<Left, Right, std::void_t<
         decltype(std::declval<const Left&>() == std::declval<const Right&>())
     >> : std::bool_constant<std::is_convertible_v<
         decltype(std::declval<const Left&>() == std::declval<const Right&>()), bool
     >> {};
 
     template <typename Left, typename Right>
-    inline constexpr bool is_equality_comparable_with_v = is_equality_comparable_with<Left, Right>::value;
+    inline constexpr bool IsEqualityComparableWithV = IsEqualityComparableWith<Left, Right>::value;
 
     template <typename, typename, typename = void>
-    struct is_static_castable : std::false_type {};
+    struct IsStaticCastable : std::false_type {};
 
     template <typename From, typename To>
-    struct is_static_castable<From, To, std::void_t<
+    struct IsStaticCastable<From, To, std::void_t<
         decltype(static_cast<To>(std::declval<From>()))
     >> : std::true_type {};
 
     template <typename From, typename To>
-    inline constexpr bool is_static_castable_v = is_static_castable<From, To>::value;
+    inline constexpr bool IsStaticCastableV = IsStaticCastable<From, To>::value;
 } // namespace detail
 
 template <typename T>
-class query
+class Query
 {
 public:
-    explicit query(std::vector<T> data) : m_data(std::move(data)) {}
-    explicit query(std::initializer_list<T> data) : m_data(data) {}
+    explicit Query(std::vector<T> data) : m_data(std::move(data)) {}
+    explicit Query(std::initializer_list<T> data) : m_data(data) {}
     template <typename InputIt>
-    explicit query(InputIt begin, InputIt end)
+    explicit Query(InputIt begin, InputIt end)
     requires (!std::is_integral_v<InputIt>) : m_data(begin, end) {}
 
     /// Returns a copy of the underlying data vector.
-    std::vector<T> get() const { return m_data; }
+    std::vector<T> Get() const { return m_data; }
 
-// region: single element queries
+// region: Single Element Queries
     /// Aggregates the elements of the collection using the specified binary predicate
     /// and the provided seed as the initial accumulator.
     template <typename Predicate>
-    T aggregate(T seed, Predicate predicate) const
+    T Aggregate(T seed, Predicate predicate) const
     {
         T result = seed;
         for(const auto& value : m_data)
@@ -95,7 +95,7 @@ public:
     /// Aggregates the elements of the collection using the specified binary predicate.
     /// Uses the first element as the initial accumulator and throws if the sequence is empty.
     template <typename Predicate>
-    T aggregate(Predicate predicate) const
+    T Aggregate(Predicate predicate) const
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -108,7 +108,7 @@ public:
     }
 
     /// Returns the first element of a sequence.
-    T& first() &
+    T& First() &
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -116,7 +116,7 @@ public:
     }
 
     /// Returns the first element of a sequence.
-    const T& first() const&
+    const T& First() const&
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -124,7 +124,7 @@ public:
     }
 
     /// Returns the first element of a sequence.
-    T first() &&
+    T First() &&
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -132,7 +132,7 @@ public:
     }
 
     /// Returns the first element of a sequence.
-    T first() const&&
+    T First() const&&
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -140,11 +140,11 @@ public:
     }
 
     /// Returns the first element of a sequence, or a default value if no element is found.
-    T first_or_default() const
+    T FirstOrDefault() const
     {
         static_assert(
             std::is_default_constructible_v<T>,
-            "query<T>::first_or_default() requires T to be default-constructible."
+            "Query<T>::FirstOrDefault() requires T to be default-constructible."
         );
         if(m_data.empty())
             return T{};
@@ -152,7 +152,7 @@ public:
     }
 
     /// Returns the last element of a sequence.
-    T& last() &
+    T& Last() &
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -160,7 +160,7 @@ public:
     }
 
     /// Returns the last element of a sequence.
-    const T& last() const&
+    const T& Last() const&
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -168,7 +168,7 @@ public:
     }
 
     /// Returns the last element of a sequence.
-    T last() &&
+    T Last() &&
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -176,7 +176,7 @@ public:
     }
 
     /// Returns the last element of a sequence.
-    T last() const&&
+    T Last() const&&
     {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -184,11 +184,11 @@ public:
     }
 
     /// Returns the last element of a sequence, or a default value if no element is found.
-    T last_or_default() const
+    T LastOrDefault() const
     {
         static_assert(
             std::is_default_constructible_v<T>,
-            "query<T>::last_or_default() requires T to be default-constructible."
+            "Query<T>::LastOrDefault() requires T to be default-constructible."
         );
         if(m_data.empty())
             return T{};
@@ -196,7 +196,7 @@ public:
     }
 
     /// Returns a single, specific element of a sequence.
-    T& single() &
+    T& Single() &
     {
         if(m_data.size() != 1)
             throw std::out_of_range("Query does not contain exactly one element.");
@@ -204,7 +204,7 @@ public:
     }
 
     /// Returns a single, specific element of a sequence.
-    const T& single() const&
+    const T& Single() const&
     {
         if(m_data.size() != 1)
             throw std::out_of_range("Query does not contain exactly one element.");
@@ -212,7 +212,7 @@ public:
     }
 
     /// Returns a single, specific element of a sequence.
-    T single() &&
+    T Single() &&
     {
         if(m_data.size() != 1)
             throw std::out_of_range("Query does not contain exactly one element.");
@@ -220,7 +220,7 @@ public:
     }
 
     /// Returns a single, specific element of a sequence.
-    T single() const&&
+    T Single() const&&
     {
         if(m_data.size() != 1)
             throw std::out_of_range("Query does not contain exactly one element.");
@@ -228,11 +228,11 @@ public:
     }
 
     /// Returns a single, specific element of a sequence, or a default value if that element is not found.
-    T single_or_default() const
+    T SingleOrDefault() const
     {
         static_assert(
             std::is_default_constructible_v<T>,
-            "query<T>::single_or_default() requires T to be default-constructible."
+            "Query<T>::SingleOrDefault() requires T to be default-constructible."
         );
         if(m_data.size() > 1)
             throw std::out_of_range("Query contains more than one element.");
@@ -240,39 +240,39 @@ public:
             return T{};
         return m_data.front();
     }
-// endregion: single element queries
+// endregion: Single Element Queries
 
-// region: query modifiers
+// region: Query Modifiers
     template <typename U>
-    query<U> cast() const
+    Query<U> Cast() const
     {
         static_assert(
-            detail::is_static_castable_v<const T&, U>,
-            "query<T>::cast<U>() requires static_cast<U>(const T&) to be well-formed."
+            detail::IsStaticCastableV<const T&, U>,
+            "Query<T>::Cast<U>() requires static_cast<U>(const T&) to be well-formed."
         );
         std::vector<U> result;
         result.reserve(m_data.size());
         for(const auto& value : m_data)
             result.push_back(static_cast<U>(value));
-        return query<U>(std::move(result));
+        return Query<U>(std::move(result));
     }
 
     /// Concatenates two sequences.
-    query concat(const query& other) const
+    Query Concat(const Query& other) const
     {
         std::vector<T> result;
         result.reserve(m_data.size() + other.m_data.size());
         result.insert(result.end(), m_data.begin(), m_data.end());
         result.insert(result.end(), other.m_data.begin(), other.m_data.end());
-        return query(std::move(result));
+        return Query(std::move(result));
     }
 
     /// Returns distinct elements from a sequence by using the default equality comparer to compare values.
-    query distinct() const
+    Query Distinct() const
     {
         std::vector<T> result;
         result.reserve(m_data.size());
-        if constexpr(detail::can_use_unordered_set_v<T>)
+        if constexpr(detail::CanUseUnorderedSetV<T>)
         {
             std::unordered_set<T> seen;
             seen.reserve(m_data.size());
@@ -291,50 +291,50 @@ public:
                     result.push_back(value);
             }
         }
-        return query(std::move(result));
+        return Query(std::move(result));
     }
 
     /// Returns distinct elements from a sequence by using a specified equality comparer to compare values.
     /// The comparer should model an equivalence relation for stable, intuitive results.
     template <typename EqualityComparer>
-    query distinct(EqualityComparer comparer) const
+    Query Distinct(EqualityComparer comparer) const
     {
         std::vector<T> result;
         result.reserve(m_data.size());
         for(const auto& value : m_data)
         {
-            bool is_duplicate = false;
+            bool isDuplicate = false;
             for(const auto& existing : result)
             {
                 if(std::invoke(comparer, value, existing))
                 {
-                    is_duplicate = true;
+                    isDuplicate = true;
                     break;
                 }
             }
-            if(!is_duplicate)
+            if(!isDuplicate)
                 result.push_back(value);
         }
-        return query(std::move(result));
+        return Query(std::move(result));
     }
 
     /// Produces the set difference of two sequences by using the default equality comparer to compare values.
     /// The result contains only unique elements.
-    query except(const query& other) const
+    Query Except(const Query& other) const
     {
         std::vector<T> result;
         result.reserve(m_data.size());
 
-        if constexpr(detail::can_use_unordered_set_v<T>)
+        if constexpr(detail::CanUseUnorderedSetV<T>)
         {
             // Use hash-based sets for efficient membership and uniqueness checks when possible.
-            std::unordered_set<T> other_set(other.m_data.begin(), other.m_data.end());
+            std::unordered_set<T> otherSet(other.m_data.begin(), other.m_data.end());
             std::unordered_set<T> seen;
             seen.reserve(m_data.size());
 
             for(const auto& value : m_data)
             {
-                if(!other_set.contains(value) && seen.insert(value).second)
+                if(!otherSet.contains(value) && seen.insert(value).second)
                 {
                     result.push_back(value);
                 }
@@ -352,60 +352,60 @@ public:
                 }
             }
         }
-        return query(std::move(result));
+        return Query(std::move(result));
     }
 
     /// Produces the set difference of two sequences by using the specified equality comparer to compare values.
     /// The result contains only unique elements according to the comparer.
     template <typename EqualityComparer>
-    query except(const query& other, EqualityComparer comparer) const
+    Query Except(const Query& other, EqualityComparer comparer) const
     {
         std::vector<T> result;
         result.reserve(m_data.size());
         for(const auto& value : m_data)
         {
-            bool is_in_other = false;
-            for(const auto& other_value : other.m_data)
+            bool isInOther = false;
+            for(const auto& otherValue : other.m_data)
             {
-                if(std::invoke(comparer, value, other_value))
+                if(std::invoke(comparer, value, otherValue))
                 {
-                    is_in_other = true;
+                    isInOther = true;
                     break;
                 }
             }
-            bool is_duplicate = false;
+            bool isDuplicate = false;
             for(const auto& existing : result)
             {
                 if(std::invoke(comparer, value, existing))
                 {
-                    is_duplicate = true;
+                    isDuplicate = true;
                     break;
                 }
             }
-            if(!is_in_other && !is_duplicate)
+            if(!isInOther && !isDuplicate)
                 result.push_back(value);
         }
-        return query(std::move(result));
+        return Query(std::move(result));
     }
 
     /// Produces the set intersection of two sequences by using the default equality comparer to compare values.
     /// The result contains only unique elements.
-    query intersect(const query& other) const
+    Query Intersect(const Query& other) const
     {
         std::vector<T> result;
         result.reserve(std::min(m_data.size(), other.m_data.size()));
-        if constexpr(detail::can_use_unordered_set_v<T>)
+        if constexpr(detail::CanUseUnorderedSetV<T>)
         {
             // Optimized path for hashable types: use hash sets to avoid quadratic scans.
-            std::unordered_set<T> other_set;
-            other_set.reserve(other.m_data.size());
-            other_set.insert(other.m_data.begin(), other.m_data.end());
+            std::unordered_set<T> otherSet;
+            otherSet.reserve(other.m_data.size());
+            otherSet.insert(other.m_data.begin(), other.m_data.end());
 
             std::unordered_set<T> seen;
             seen.reserve(m_data.size());
             for(const auto& value : m_data)
             {
-                if(other_set.contains(value))
+                if(otherSet.contains(value))
                 {
                     // seen.insert(value).second is true only if value was not already present.
                     if(seen.insert(value).second)
@@ -423,99 +423,99 @@ public:
                     result.push_back(value);
             }
         }
-        return query(std::move(result));
+        return Query(std::move(result));
     }
 
     /// Produces the set intersection of two sequences by using the specified equality comparer to compare values.
     /// The result contains only unique elements according to the comparer.
     template <typename EqualityComparer>
-    query intersect(const query& other, EqualityComparer comparer) const
+    Query Intersect(const Query& other, EqualityComparer comparer) const
     {
         std::vector<T> result;
         result.reserve(m_data.size());
         for(const auto& value : m_data)
         {
-            bool is_in_other = false;
-            for(const auto& other_value : other.m_data)
+            bool isInOther = false;
+            for(const auto& otherValue : other.m_data)
             {
-                if(std::invoke(comparer, value, other_value))
+                if(std::invoke(comparer, value, otherValue))
                 {
-                    is_in_other = true;
+                    isInOther = true;
                     break;
                 }
             }
 
-            bool is_duplicate = false;
+            bool isDuplicate = false;
             for(const auto& existing : result)
             {
                 if(std::invoke(comparer, value, existing))
                 {
-                    is_duplicate = true;
+                    isDuplicate = true;
                     break;
                 }
             }
 
-            if(is_in_other && !is_duplicate)
+            if(isInOther && !isDuplicate)
                 result.push_back(value);
         }
-        return query(std::move(result));
+        return Query(std::move(result));
     }
 
     /// Correlates the elements of two sequences based on matching keys.
     /// The default equality comparer is used to compare keys selected from each sequence.
     template <typename U, typename OuterKeySelector, typename InnerKeySelector>
-    query<std::pair<T, U>> join(const query<U>& other, OuterKeySelector outer_key_selector,
-                                InnerKeySelector inner_key_selector) const
+    Query<std::pair<T, U>> Join(const Query<U>& other, OuterKeySelector outerKeySelector,
+                                InnerKeySelector innerKeySelector) const
     {
-        using outer_key_t = std::invoke_result_t<OuterKeySelector&, const T&>;
-        using inner_key_t = std::invoke_result_t<InnerKeySelector&, const U&>;
+        using outerKeyT = std::invoke_result_t<OuterKeySelector&, const T&>;
+        using innerKeyT = std::invoke_result_t<InnerKeySelector&, const U&>;
         static_assert(
-            detail::is_equality_comparable_with_v<inner_key_t, outer_key_t>,
-            "query<T>::join(...) requires selected key types to be comparable with operator==."
+            detail::IsEqualityComparableWithV<innerKeyT, outerKeyT>,
+            "Query<T>::Join(...) requires selected key types to be comparable with operator==."
         );
 
         std::vector<std::pair<T, U>> result;
         for(const auto& value : m_data)
         {
-            const auto& key = std::invoke(outer_key_selector, value);
-            for(const auto& other_value : other.m_data)
+            const auto& key = std::invoke(outerKeySelector, value);
+            for(const auto& otherValue : other.m_data)
             {
-                if(std::invoke(inner_key_selector, other_value) == key)
-                    result.emplace_back(value, other_value);
+                if(std::invoke(innerKeySelector, otherValue) == key)
+                    result.emplace_back(value, otherValue);
             }
         }
-        return query<std::pair<T, U>>(std::move(result));
+        return Query<std::pair<T, U>>(std::move(result));
     }
 
     /// Correlates the elements of two sequences based on matching keys.
     /// The specified equality comparer is used to compare keys selected from each sequence.
     template <typename U, typename OuterKeySelector, typename InnerKeySelector, typename EqualityComparer>
-    query<std::pair<T, U>> join(const query<U>& other, OuterKeySelector outer_key_selector,
-                                InnerKeySelector inner_key_selector, EqualityComparer comparer) const
+    Query<std::pair<T, U>> Join(const Query<U>& other, OuterKeySelector outerKeySelector,
+                                InnerKeySelector innerKeySelector, EqualityComparer comparer) const
     {
         std::vector<std::pair<T, U>> result;
         for(const auto& value : m_data)
         {
-            const auto& key = std::invoke(outer_key_selector, value);
-            for(const auto& other_value : other.m_data)
+            const auto& key = std::invoke(outerKeySelector, value);
+            for(const auto& otherValue : other.m_data)
             {
-                if(std::invoke(comparer, std::invoke(inner_key_selector, other_value), key))
-                    result.emplace_back(value, other_value);
+                if(std::invoke(comparer, std::invoke(innerKeySelector, otherValue), key))
+                    result.emplace_back(value, otherValue);
             }
         }
-        return query<std::pair<T, U>>(std::move(result));
+        return Query<std::pair<T, U>>(std::move(result));
     }
 
     /// Inverts the order of the elements in a sequence.
-    query reverse() const
+    Query Reverse() const
     {
         std::vector<T> result(m_data.rbegin(), m_data.rend());
-        return query(std::move(result));
+        return Query(std::move(result));
     }
 
     /// Determines whether two sequences are equal by comparing the elements by using
     /// the default equality comparer for their type.
-    bool sequence_equal(const query& other) const
+    bool SequenceEqual(const Query& other) const
     {
         if(m_data.size() != other.m_data.size())
             return false;
@@ -525,7 +525,7 @@ public:
 
     /// Determines whether two sequences are equal by comparing the elements by using the specified equality comparer.
     template <typename EqualityComparer>
-    bool sequence_equal(const query& other, EqualityComparer comparer) const
+    bool SequenceEqual(const Query& other, EqualityComparer comparer) const
     {
         if(m_data.size() != other.m_data.size())
             return false;
@@ -540,7 +540,7 @@ public:
     /// Bypasses elements in a sequence as long as a specified condition is true,
     /// and then returns the remaining elements.
     template <typename Predicate>
-    query skip_while(Predicate predicate) const
+    Query SkipWhile(Predicate predicate) const
     {
         std::vector<T> result;
         result.reserve(m_data.size());
@@ -552,13 +552,13 @@ public:
             skipping = false;
             result.push_back(value);
         }
-        return query(std::move(result));
+        return Query(std::move(result));
     }
 
     /// Returns elements from a sequence as long as a specified condition is true,
     /// and then skips the remaining elements.
     template <typename Predicate>
-    query take_while(Predicate predicate) const
+    Query TakeWhile(Predicate predicate) const
     {
         std::vector<T> result;
         result.reserve(m_data.size());
@@ -568,17 +568,17 @@ public:
                 break;
             result.push_back(value);
         }
-        return query(std::move(result));
+        return Query(std::move(result));
     }
 
     /// Produces the set union of two sequences.
     /// The result contains only unique elements.
-    query unite(const query& other) const
+    Query Unite(const Query& other) const
     {
         std::vector<T> result;
         result.reserve(m_data.size() + other.m_data.size());
 
-        if constexpr(detail::can_use_unordered_set_v<T>)
+        if constexpr(detail::CanUseUnorderedSetV<T>)
         {
             std::unordered_set<T> seen;
             seen.reserve(m_data.size() + other.m_data.size());
@@ -609,12 +609,12 @@ public:
                     result.push_back(value);
             }
         }
-        return query(std::move(result));
+        return Query(std::move(result));
     }
 
     /// Filters a sequence of values based on a predicate.
     template <typename Predicate>
-    query where(Predicate predicate) const
+    Query Where(Predicate predicate) const
     {
         std::vector<T> result;
         result.reserve(m_data.size());
@@ -623,21 +623,21 @@ public:
             if(std::invoke(predicate, value))
                 result.push_back(value);
         }
-        return query(std::move(result));
+        return Query(std::move(result));
     }
-// endregion: query modifiers
+// endregion: Query Modifiers
 
-// region: check queries
+// region: Check Queries
     /// Determines whether all elements of a sequence satisfy a condition.
     template <typename Predicate>
-    bool all(Predicate predicate) const
+    bool All(Predicate predicate) const
     {
         return std::all_of(m_data.begin(), m_data.end(), [&](const T& value) { return std::invoke(predicate, value); });
     }
 
     /// Determines whether any element of a sequence satisfies a condition.
     template <typename Predicate>
-    bool any(Predicate predicate) const
+    bool Any(Predicate predicate) const
     {
         return std::any_of(m_data.begin(), m_data.end(), [&](const T& value) { return std::invoke(predicate, value); });
     }
@@ -646,7 +646,7 @@ public:
     /// Only available when T is an arithmetic type.
     /// For integral types, returns a double to avoid truncation.
     template <typename U = T>
-    auto average() const -> std::conditional_t<std::is_integral_v<T>, double, T>
+    auto Average() const -> std::conditional_t<std::is_integral_v<T>, double, T>
     requires (std::is_arithmetic_v<U>) {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -660,7 +660,7 @@ public:
     }
 
     /// Determines whether a sequence contains a specified element by using the default equality comparer.
-    bool contains(const T& element) const
+    bool Contains(const T& element) const
     {
         return std::find(m_data.begin(), m_data.end(), element) != m_data.end();
     }
@@ -668,7 +668,7 @@ public:
     /// Returns the maximum value in a sequence of values.
     /// Only available when T is an arithmetic type.
     template <typename U = T>
-    T max() const
+    T Max() const
     requires (std::is_arithmetic_v<U>) {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -678,7 +678,7 @@ public:
     /// Returns the minimum value in a sequence of values.
     /// Only available when T is an arithmetic type.
     template <typename U = T>
-    T min() const
+    T Min() const
     requires (std::is_arithmetic_v<U>) {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
@@ -688,17 +688,67 @@ public:
     /// Computes the sum of a sequence of numeric values.
     /// Only available when T is an arithmetic type.
     template <typename U = T>
-    T sum() const
+    T Sum() const
     requires (std::is_arithmetic_v<U>) {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
         return std::accumulate(m_data.begin(), m_data.end(), static_cast<T>(0));
     }
-// endregion: check queries
+// endregion: Check Queries
+
+#ifdef USE_STL_NAMING
+    std::vector<T> get() const { return Get(); }
+    T aggregate(T seed, auto predicate) const { return Aggregate(seed, predicate); }
+    T aggregate(auto predicate) const { return Aggregate(predicate); }
+    T& first() & { return First(); }
+    const T& first() const& { return First(); }
+    T first() && { return First(); }
+    T first() const&& { return First(); }
+    T first_or_default() const { return FirstOrDefault(); }
+    T last() & { return Last(); }
+    const T& last() const& { return Last(); }
+    T last() && { return Last(); }
+    T last() const&& { return Last(); }
+    T last_or_default() const { return LastOrDefault(); }
+    T& single() & { return Single(); }
+    const T& single() const& { return Single(); }
+    T single() && { return Single(); }
+    T single() const&& { return Single(); }
+    T single_or_default() const { return SingleOrDefault(); }
+    template <typename U> Query<U> cast() const { return Cast<U>(); }
+    Query concat(const Query& other) const { return Concat(other); }
+    Query distinct() const { return Distinct(); }
+    template <typename EqualityComparer> Query distinct(EqualityComparer comparer) const { return Distinct(comparer); }
+    Query except(const Query& other) const { return Except(other); }
+    template <typename EqualityComparer> Query except(const Query& other, EqualityComparer comparer) const { return Except(other, comparer); }
+    Query intersect(const Query& other) const { return Intersect(other); }
+    template <typename EqualityComparer> Query intersect(const Query& other, EqualityComparer comparer) const { return Intersect(other, comparer); }
+    template <typename U, typename OuterKeySelector, typename InnerKeySelector> Query<std::pair<T, U>> join(const Query<U>& other, OuterKeySelector outerKeySelector, InnerKeySelector innerKeySelector) const { return Join(other, outerKeySelector, innerKeySelector); }
+    template <typename U, typename OuterKeySelector, typename InnerKeySelector, typename EqualityComparer> Query<std::pair<T, U>> join(const Query<U>& other, OuterKeySelector outerKeySelector, InnerKeySelector innerKeySelector, EqualityComparer comparer) const { return Join(other, outerKeySelector, innerKeySelector, comparer); }
+    Query reverse() const { return Reverse(); }
+    bool sequence_equal(const Query& other) const { return SequenceEqual(other); }
+    template <typename EqualityComparer> bool sequence_equal(const Query& other, EqualityComparer comparer) const { return SequenceEqual(other, comparer); }
+    template <typename Predicate> Query skip_while(Predicate predicate) const { return SkipWhile(predicate); }
+    template <typename Predicate> Query take_while(Predicate predicate) const { return TakeWhile(predicate); }
+    Query unite(const Query& other) const { return Unite(other); }
+    template <typename Predicate> Query where(Predicate predicate) const { return Where(predicate); }
+    template <typename Predicate> bool all(Predicate predicate) const { return All(predicate); }
+    template <typename Predicate> bool any(Predicate predicate) const { return Any(predicate); }
+    template <typename U = T> auto average() const { return Average<U>(); }
+    bool contains(const T& element) const { return Contains(element); }
+    template <typename U = T> T max() const { return Max<U>(); }
+    template <typename U = T> T min() const { return Min<U>(); }
+    template <typename U = T> T sum() const { return Sum<U>(); }
+#endif // USE_STL_NAMING
 
 private:
     std::vector<T> m_data;
 };
+
+#ifdef USE_STL_NAMING
+template <typename T>
+using query = Query<T>;
+#endif // USE_STL_NAMING
 
 } // namespace vwr
 

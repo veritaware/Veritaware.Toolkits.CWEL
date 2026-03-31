@@ -1,4 +1,4 @@
-/* Unit tests for vwr::property<T>
+/* Unit tests for vwr::Property<T>
  * Copyright (c) 2026 Veritaware
  * SPDX-License-Identifier: Zlib
  */
@@ -11,176 +11,176 @@
 
 namespace
 {
-int g_property_changed_count = 0;
-int g_last_old_value = 0;
-int g_last_new_value = 0;
-const void* g_last_sender = nullptr;
+int gPropertyChangedCount = 0;
+int gLastOldValue = 0;
+int gLastNewValue = 0;
+const void* gLastSender = nullptr;
 
-void reset_property_state()
+void resetPropertyState()
 {
-    g_property_changed_count = 0;
-    g_last_old_value = 0;
-    g_last_new_value = 0;
-    g_last_sender = nullptr;
+    gPropertyChangedCount = 0;
+    gLastOldValue = 0;
+    gLastNewValue = 0;
+    gLastSender = nullptr;
 }
 
-void on_int_property_changed(const void* sender, const vwr::property_changed_event_args<int>& args)
+void onIntPropertyChanged(const void* sender, const vwr::PropertyChangedEventArgs<int>& args)
 {
-    ++g_property_changed_count;
-    g_last_old_value = args.old_value;
-    g_last_new_value = args.new_value;
-    g_last_sender = sender;
+    ++gPropertyChangedCount;
+    gLastOldValue = args.OldValue;
+    gLastNewValue = args.NewValue;
+    gLastSender = sender;
 }
 } // namespace
 
-TEST_CASE("property - construction and value access", "[property][constructor]")
+TEST_CASE("Property - Construction and value access", "[Property][Constructor]")
 {
-    SECTION("default construction works for default-constructible class types")
+    SECTION("Default construction works for default-constructible class types")
     {
-        vwr::property<std::string> value;
-        REQUIRE(value.get().empty());
+        vwr::Property<std::string> value;
+        REQUIRE(value.Get().empty());
         REQUIRE(value().empty());
     }
 
-    SECTION("construction with initial value stores that value")
+    SECTION("Construction with initial value stores that value")
     {
-        vwr::property<int> value(42);
-        REQUIRE(value.get() == 42);
+        vwr::Property<int> value(42);
+        REQUIRE(value.Get() == 42);
         REQUIRE(value() == 42);
     }
 }
 
-TEST_CASE("property - property_changed_event_args stores old and new value", "[property][event-args]")
+TEST_CASE("Property - PropertyChangedEventArgs stores old and new value", "[Property][EventArgs]")
 {
-    vwr::property_changed_event_args<int> args(3, 7);
+    vwr::PropertyChangedEventArgs<int> args(3, 7);
 
-    REQUIRE(args.old_value == 3);
-    REQUIRE(args.new_value == 7);
+    REQUIRE(args.OldValue == 3);
+    REQUIRE(args.NewValue == 7);
 }
 
-TEST_CASE("property - set updates value and raises property_changed event", "[property][set][event]")
+TEST_CASE("Property - Set updates value and raises PropertyChanged event", "[Property][Set][Event]")
 {
-    reset_property_state();
+    resetPropertyState();
 
-    vwr::property<int> value(10);
-    vwr::delegate changed_delegate(on_int_property_changed);
-    value.property_changed += changed_delegate;
+    vwr::Property<int> value(10);
+    vwr::Delegate changedDelegate(onIntPropertyChanged);
+    value.PropertyChanged += changedDelegate;
 
-    value.set(25);
+    value.Set(25);
 
-    REQUIRE(value.get() == 25);
-    REQUIRE(g_property_changed_count == 1);
-    REQUIRE(g_last_old_value == 10);
-    REQUIRE(g_last_new_value == 25);
-    REQUIRE(g_last_sender == &value);
+    REQUIRE(value.Get() == 25);
+    REQUIRE(gPropertyChangedCount == 1);
+    REQUIRE(gLastOldValue == 10);
+    REQUIRE(gLastNewValue == 25);
+    REQUIRE(gLastSender == &value);
 }
 
-TEST_CASE("property - operator= from raw value updates value and raises event", "[property][assignment][event]")
+TEST_CASE("Property - operator= from raw value updates value and raises event", "[Property][Assignment][Event]")
 {
-    reset_property_state();
+    resetPropertyState();
 
-    vwr::property<int> value(5);
-    vwr::delegate changed_delegate(on_int_property_changed);
-    value.property_changed += changed_delegate;
+    vwr::Property<int> value(5);
+    vwr::Delegate changedDelegate(onIntPropertyChanged);
+    value.PropertyChanged += changedDelegate;
 
     value = 9;
 
-    REQUIRE(value.get() == 9);
-    REQUIRE(g_property_changed_count == 1);
-    REQUIRE(g_last_old_value == 5);
-    REQUIRE(g_last_new_value == 9);
-    REQUIRE(g_last_sender == &value);
+    REQUIRE(value.Get() == 9);
+    REQUIRE(gPropertyChangedCount == 1);
+    REQUIRE(gLastOldValue == 5);
+    REQUIRE(gLastNewValue == 9);
+    REQUIRE(gLastSender == &value);
 }
 
-TEST_CASE("property - assigning the same value does not raise event", "[property][set][event]")
+TEST_CASE("Property - Assigning the same value does not raise event", "[Property][Set][Event]")
 {
-    reset_property_state();
+    resetPropertyState();
 
-    vwr::property<int> value(12);
-    vwr::delegate changed_delegate(on_int_property_changed);
-    value.property_changed += changed_delegate;
+    vwr::Property<int> value(12);
+    vwr::Delegate changedDelegate(onIntPropertyChanged);
+    value.PropertyChanged += changedDelegate;
 
-    value.set(12);
+    value.Set(12);
 
-    REQUIRE(value.get() == 12);
-    REQUIRE(g_property_changed_count == 0);
+    REQUIRE(value.Get() == 12);
+    REQUIRE(gPropertyChangedCount == 0);
 }
 
-TEST_CASE("property - copy construction copies value but not subscriptions", "[property][copy]")
+TEST_CASE("Property - Copy construction copies value but not subscriptions", "[Property][Copy]")
 {
-    reset_property_state();
+    resetPropertyState();
 
-    vwr::property<int> original(21);
-    vwr::delegate original_delegate(on_int_property_changed);
-    original.property_changed += original_delegate;
+    vwr::Property<int> original(21);
+    vwr::Delegate originalDelegate(onIntPropertyChanged);
+    original.PropertyChanged += originalDelegate;
 
-    vwr::property<int> copy(original);
+    vwr::Property<int> copy(original);
 
-    REQUIRE(copy.get() == 21);
+    REQUIRE(copy.Get() == 21);
 
-    copy.set(30);
+    copy.Set(30);
 
-    REQUIRE(copy.get() == 30);
-    REQUIRE(g_property_changed_count == 0);
+    REQUIRE(copy.Get() == 30);
+    REQUIRE(gPropertyChangedCount == 0);
 
-    original.set(40);
+    original.Set(40);
 
-    REQUIRE(g_property_changed_count == 1);
-    REQUIRE(g_last_old_value == 21);
-    REQUIRE(g_last_new_value == 40);
-    REQUIRE(g_last_sender == &original);
+    REQUIRE(gPropertyChangedCount == 1);
+    REQUIRE(gLastOldValue == 21);
+    REQUIRE(gLastNewValue == 40);
+    REQUIRE(gLastSender == &original);
 }
 
-TEST_CASE("property - copied property can have its own subscriptions independent of source", "[property][copy][event]")
+TEST_CASE("Property - Copied Property can have its own subscriptions independent of source", "[Property][Copy][Event]")
 {
-    reset_property_state();
+    resetPropertyState();
 
-    vwr::property<int> original(1);
-    vwr::property<int> copy(original);
-    vwr::delegate copy_delegate(on_int_property_changed);
-    copy.property_changed += copy_delegate;
+    vwr::Property<int> original(1);
+    vwr::Property<int> copy(original);
+    vwr::Delegate copyDelegate(onIntPropertyChanged);
+    copy.PropertyChanged += copyDelegate;
 
-    copy.set(8);
+    copy.Set(8);
 
-    REQUIRE(g_property_changed_count == 1);
-    REQUIRE(g_last_old_value == 1);
-    REQUIRE(g_last_new_value == 8);
-    REQUIRE(g_last_sender == &copy);
+    REQUIRE(gPropertyChangedCount == 1);
+    REQUIRE(gLastOldValue == 1);
+    REQUIRE(gLastNewValue == 8);
+    REQUIRE(gLastSender == &copy);
 }
 
-TEST_CASE("property - assignment from another property uses source value and raises event only on change", "[property][copy][assignment]")
+TEST_CASE("Property - Assignment from another Property uses source value and raises event only on change", "[Property][Copy][Assignment]")
 {
-    SECTION("assignment from property with different value raises event")
+    SECTION("Assignment from Property with different value raises event")
     {
-        reset_property_state();
+        resetPropertyState();
 
-        vwr::property<int> source(33);
-        vwr::property<int> destination(11);
-        vwr::delegate destination_delegate(on_int_property_changed);
-        destination.property_changed += destination_delegate;
+        vwr::Property<int> source(33);
+        vwr::Property<int> destination(11);
+        vwr::Delegate destinationDelegate(onIntPropertyChanged);
+        destination.PropertyChanged += destinationDelegate;
 
         destination = source;
 
-        REQUIRE(destination.get() == 33);
-        REQUIRE(g_property_changed_count == 1);
-        REQUIRE(g_last_old_value == 11);
-        REQUIRE(g_last_new_value == 33);
-        REQUIRE(g_last_sender == &destination);
+        REQUIRE(destination.Get() == 33);
+        REQUIRE(gPropertyChangedCount == 1);
+        REQUIRE(gLastOldValue == 11);
+        REQUIRE(gLastNewValue == 33);
+        REQUIRE(gLastSender == &destination);
     }
 
-    SECTION("assignment from property with equal value does not raise event")
+    SECTION("Assignment from Property with equal value does not raise event")
     {
-        reset_property_state();
+        resetPropertyState();
 
-        vwr::property<int> source(44);
-        vwr::property<int> destination(44);
-        vwr::delegate destination_delegate(on_int_property_changed);
-        destination.property_changed += destination_delegate;
+        vwr::Property<int> source(44);
+        vwr::Property<int> destination(44);
+        vwr::Delegate destinationDelegate(onIntPropertyChanged);
+        destination.PropertyChanged += destinationDelegate;
 
         destination = source;
 
-        REQUIRE(destination.get() == 44);
-        REQUIRE(g_property_changed_count == 0);
+        REQUIRE(destination.Get() == 44);
+        REQUIRE(gPropertyChangedCount == 0);
     }
 }
 

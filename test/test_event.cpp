@@ -1,4 +1,4 @@
-/* Unit tests for vwr::event_handler and vwr::delegate
+/* Unit tests for vwr::EventHandler and vwr::Delegate
  * Copyright (c) 2026 Veritaware
  * SPDX-License-Identifier: Zlib
  */
@@ -9,259 +9,259 @@
 
 namespace
 {
-struct test_event_args
+struct TestEventArgs
 {
     int value;
 };
 
-int g_call_count_a = 0;
-int g_call_count_b = 0;
-int g_call_count_c = 0;
-int g_sum = 0;
-const void* g_last_sender = nullptr;
+int gCallCountA = 0;
+int gCallCountB = 0;
+int gCallCountC = 0;
+int gSum = 0;
+const void* gLastSender = nullptr;
 
-void reset_state()
+void resetState()
 {
-    g_call_count_a = 0;
-    g_call_count_b = 0;
-    g_call_count_c = 0;
-    g_sum = 0;
-    g_last_sender = nullptr;
+    gCallCountA = 0;
+    gCallCountB = 0;
+    gCallCountC = 0;
+    gSum = 0;
+    gLastSender = nullptr;
 }
 
-void callback_a(const void* sender, const test_event_args& args)
+void callbackA(const void* sender, const TestEventArgs& args)
 {
-    ++g_call_count_a;
-    g_sum += args.value;
-    g_last_sender = sender;
+    ++gCallCountA;
+    gSum += args.value;
+    gLastSender = sender;
 }
 
-void callback_b(const void* sender, const test_event_args& args)
+void callbackB(const void* sender, const TestEventArgs& args)
 {
-    ++g_call_count_b;
-    g_sum += args.value * 10;
-    g_last_sender = sender;
+    ++gCallCountB;
+    gSum += args.value * 10;
+    gLastSender = sender;
 }
 
-void callback_c(const void* sender, const test_event_args& args)
+void callbackC(const void* sender, const TestEventArgs& args)
 {
-    ++g_call_count_c;
-    g_sum += args.value * 100;
-    g_last_sender = sender;
+    ++gCallCountC;
+    gSum += args.value * 100;
+    gLastSender = sender;
 }
 
-void null_safe_callback(const void*, const test_event_args&) {}
+void nullSafeCallback(const void*, const TestEventArgs&) {}
 } // namespace
 
-TEST_CASE("event - subscribe and invoke single delegate", "[event][invoke]")
+TEST_CASE("Event - Subscribe and invoke single Delegate", "[Event][Invoke]")
 {
-    reset_state();
+    resetState();
 
-    vwr::event_handler<test_event_args> handler;
-    vwr::delegate d(callback_a);
+    vwr::EventHandler<TestEventArgs> handler;
+    vwr::Delegate d(callbackA);
 
     handler += d;
 
     constexpr int sender = 123;
-    handler(&sender, test_event_args{5});
+    handler(&sender, TestEventArgs{5});
 
-    REQUIRE(g_call_count_a == 1);
-    REQUIRE(g_call_count_b == 0);
-    REQUIRE(g_sum == 5);
-    REQUIRE(g_last_sender == &sender);
+    REQUIRE(gCallCountA == 1);
+    REQUIRE(gCallCountB == 0);
+    REQUIRE(gSum == 5);
+    REQUIRE(gLastSender == &sender);
 }
 
-TEST_CASE("event - multiple delegates are invoked", "[event][invoke]")
+TEST_CASE("Event - Multiple Delegates are invoked", "[Event][Invoke]")
 {
-    reset_state();
+    resetState();
 
-    vwr::event_handler<test_event_args> handler;
-    vwr::delegate d1(callback_a);
-    vwr::delegate d2(callback_b);
+    vwr::EventHandler<TestEventArgs> handler;
+    vwr::Delegate d1(callbackA);
+    vwr::Delegate d2(callbackB);
 
     handler += d1;
     handler += d2;
 
-    handler(nullptr, test_event_args{2});
+    handler(nullptr, TestEventArgs{2});
 
-    REQUIRE(g_call_count_a == 1);
-    REQUIRE(g_call_count_b == 1);
-    REQUIRE(g_sum == 22);
+    REQUIRE(gCallCountA == 1);
+    REQUIRE(gCallCountB == 1);
+    REQUIRE(gSum == 22);
 }
 
-TEST_CASE("event - adding the same delegate twice does not duplicate subscription", "[event][subscribe]")
+TEST_CASE("Event - Adding the same Delegate twice does not duplicate subscription", "[Event][Subscribe]")
 {
-    reset_state();
+    resetState();
 
-    vwr::event_handler<test_event_args> handler;
-    vwr::delegate d(callback_a);
+    vwr::EventHandler<TestEventArgs> handler;
+    vwr::Delegate d(callbackA);
 
     handler += d;
     handler += d;
 
-    handler(nullptr, test_event_args{3});
+    handler(nullptr, TestEventArgs{3});
 
-    REQUIRE(g_call_count_a == 1);
-    REQUIRE(g_sum == 3);
+    REQUIRE(gCallCountA == 1);
+    REQUIRE(gSum == 3);
 }
 
-TEST_CASE("event - operator-= unsubscribes delegate", "[event][unsubscribe]")
+TEST_CASE("Event - operator-= unsubscribes Delegate", "[Event][Unsubscribe]")
 {
-    reset_state();
+    resetState();
 
-    vwr::event_handler<test_event_args> handler;
-    vwr::delegate d(callback_a);
+    vwr::EventHandler<TestEventArgs> handler;
+    vwr::Delegate d(callbackA);
 
     handler += d;
     handler -= d;
 
-    handler(nullptr, test_event_args{7});
+    handler(nullptr, TestEventArgs{7});
 
-    REQUIRE(g_call_count_a == 0);
-    REQUIRE(g_sum == 0);
+    REQUIRE(gCallCountA == 0);
+    REQUIRE(gSum == 0);
 }
 
-TEST_CASE("event - delegate destructor auto-unsubscribes", "[event][lifetime]")
+TEST_CASE("Event - Delegate destructor auto-unsubscribes", "[Event][Lifetime]")
 {
-    reset_state();
+    resetState();
 
-    vwr::event_handler<test_event_args> handler;
+    vwr::EventHandler<TestEventArgs> handler;
     {
-        vwr::delegate d(callback_a);
+        vwr::Delegate d(callbackA);
         handler += d;
     }
 
-    handler(nullptr, test_event_args{9});
+    handler(nullptr, TestEventArgs{9});
 
-    REQUIRE(g_call_count_a == 0);
-    REQUIRE(g_sum == 0);
+    REQUIRE(gCallCountA == 0);
+    REQUIRE(gSum == 0);
 }
 
-TEST_CASE("event - handler destruction allows delegate to outlive handler safely", "[event][lifetime]")
+TEST_CASE("Event - EventHandler destruction allows Delegate to outlive handler safely", "[Event][Lifetime]")
 {
-    reset_state();
+    resetState();
 
-    auto* d = new vwr::delegate(callback_a);
+    auto* d = new vwr::Delegate(callbackA);
     {
-        vwr::event_handler<test_event_args> handler;
+        vwr::EventHandler<TestEventArgs> handler;
         handler += *d;
-        handler(nullptr, test_event_args{1});
-        REQUIRE(g_call_count_a == 1);
+        handler(nullptr, TestEventArgs{1});
+        REQUIRE(gCallCountA == 1);
     }
 
     delete d;
     SUCCEED();
 }
 
-TEST_CASE("event - delegate can be reused after previous handler is destroyed", "[event][lifetime]")
+TEST_CASE("Event - Delegate can be reused after previous EventHandler is destroyed", "[Event][Lifetime]")
 {
-    reset_state();
+    resetState();
 
-    vwr::delegate d(callback_a);
+    vwr::Delegate d(callbackA);
 
     {
-        vwr::event_handler<test_event_args> handler_a;
-        handler_a += d;
-        handler_a(nullptr, test_event_args{1});
+        vwr::EventHandler<TestEventArgs> handlerA;
+        handlerA += d;
+        handlerA(nullptr, TestEventArgs{1});
     }
 
-    vwr::event_handler<test_event_args> handler_b;
-    handler_b += d;
-    handler_b(nullptr, test_event_args{4});
+    vwr::EventHandler<TestEventArgs> handlerB;
+    handlerB += d;
+    handlerB(nullptr, TestEventArgs{4});
 
-    REQUIRE(g_call_count_a == 2);
-    REQUIRE(g_sum == 5);
+    REQUIRE(gCallCountA == 2);
+    REQUIRE(gSum == 5);
 }
 
-TEST_CASE("event - null callback is safe", "[event][invoke]")
+TEST_CASE("Event - Null callback is safe", "[Event][Invoke]")
 {
-    reset_state();
+    resetState();
 
-    vwr::event_handler<test_event_args> handler;
-    vwr::delegate<test_event_args> d(nullptr);
-    vwr::delegate d2(null_safe_callback);
+    vwr::EventHandler<TestEventArgs> handler;
+    vwr::Delegate<TestEventArgs> d(nullptr);
+    vwr::Delegate d2(nullSafeCallback);
 
     handler += d;
     handler += d2;
 
-    handler(nullptr, test_event_args{11});
+    handler(nullptr, TestEventArgs{11});
 
-    REQUIRE(g_call_count_a == 0);
-    REQUIRE(g_call_count_b == 0);
-    REQUIRE(g_sum == 0);
+    REQUIRE(gCallCountA == 0);
+    REQUIRE(gCallCountB == 0);
+    REQUIRE(gSum == 0);
 }
 
-TEST_CASE("event - delegate removed between emits is not called again", "[event][edge-case][unsubscribe]")
+TEST_CASE("Event - Delegate removed between emits is not called again", "[Event][EdgeCase][Unsubscribe]")
 {
-    reset_state();
+    resetState();
 
-    vwr::event_handler<test_event_args> handler;
-    vwr::delegate self(callback_a);
-    vwr::delegate other(callback_b);
+    vwr::EventHandler<TestEventArgs> handler;
+    vwr::Delegate self(callbackA);
+    vwr::Delegate other(callbackB);
 
     handler += self;
     handler += other;
 
-    handler(nullptr, test_event_args{2});
+    handler(nullptr, TestEventArgs{2});
 
-    REQUIRE(g_call_count_a == 1);
-    REQUIRE(g_call_count_b == 1);
-    REQUIRE(g_sum == 22);
+    REQUIRE(gCallCountA == 1);
+    REQUIRE(gCallCountB == 1);
+    REQUIRE(gSum == 22);
 
     handler -= self;
-    handler(nullptr, test_event_args{3});
+    handler(nullptr, TestEventArgs{3});
 
-    REQUIRE(g_call_count_a == 1);
-    REQUIRE(g_call_count_b == 2);
-    REQUIRE(g_sum == 52);
+    REQUIRE(gCallCountA == 1);
+    REQUIRE(gCallCountB == 2);
+    REQUIRE(gSum == 52);
 }
 
-TEST_CASE("event - removing one delegate between emits leaves remaining delegates active", "[event][edge-case][unsubscribe]")
+TEST_CASE("Event - Removing one Delegate between emits leaves remaining Delegates active", "[Event][EdgeCase][Unsubscribe]")
 {
-    reset_state();
+    resetState();
 
-    vwr::event_handler<test_event_args> handler;
-    vwr::delegate remover(callback_a);
-    vwr::delegate removed(callback_b);
+    vwr::EventHandler<TestEventArgs> handler;
+    vwr::Delegate remover(callbackA);
+    vwr::Delegate removed(callbackB);
 
     handler += remover;
     handler += removed;
 
-    handler(nullptr, test_event_args{2});
+    handler(nullptr, TestEventArgs{2});
 
-    REQUIRE(g_call_count_a == 1);
-    REQUIRE(g_call_count_b == 1);
-    REQUIRE(g_sum == 22);
+    REQUIRE(gCallCountA == 1);
+    REQUIRE(gCallCountB == 1);
+    REQUIRE(gSum == 22);
 
     handler -= removed;
-    handler(nullptr, test_event_args{4});
+    handler(nullptr, TestEventArgs{4});
 
-    REQUIRE(g_call_count_a == 2);
-    REQUIRE(g_call_count_b == 1);
-    REQUIRE(g_sum == 26);
+    REQUIRE(gCallCountA == 2);
+    REQUIRE(gCallCountB == 1);
+    REQUIRE(gSum == 26);
 }
 
-TEST_CASE("event - adding a delegate between emits affects only subsequent emits", "[event][edge-case][subscribe]")
+TEST_CASE("Event - Adding a Delegate between emits affects only subsequent emits", "[Event][EdgeCase][Subscribe]")
 {
-    reset_state();
+    resetState();
 
-    vwr::event_handler<test_event_args> handler;
-    vwr::delegate installer(callback_a);
-    vwr::delegate late(callback_c);
+    vwr::EventHandler<TestEventArgs> handler;
+    vwr::Delegate installer(callbackA);
+    vwr::Delegate late(callbackC);
 
     handler += installer;
 
-    handler(nullptr, test_event_args{2});
+    handler(nullptr, TestEventArgs{2});
 
-    REQUIRE(g_call_count_a == 1);
-    REQUIRE(g_call_count_c == 0);
-    REQUIRE(g_sum == 2);
+    REQUIRE(gCallCountA == 1);
+    REQUIRE(gCallCountC == 0);
+    REQUIRE(gSum == 2);
 
     handler += late;
-    handler(nullptr, test_event_args{3});
+    handler(nullptr, TestEventArgs{3});
 
-    REQUIRE(g_call_count_a == 2);
-    REQUIRE(g_call_count_c == 1);
-    REQUIRE(g_sum == 305);
+    REQUIRE(gCallCountA == 2);
+    REQUIRE(gCallCountC == 1);
+    REQUIRE(gSum == 305);
 }
 

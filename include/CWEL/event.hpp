@@ -14,24 +14,24 @@
 namespace vwr
 {
 
-template <typename event_args_t>
-class event_handler;
+template <typename EventArgsT>
+class EventHandler;
 
-/// Provides a delegate type that can be used to subscribe callbacks to events with specific argument types.
-/// Copying/moving delegates is not permitted.
-template <typename event_args_t>
-class delegate
+/// Provides a Delegate type that can be used to subscribe callbacks to events with specific argument types.
+/// Copying/moving Delegates is not permitted.
+template <typename EventArgsT>
+class Delegate
 {
 public:
-    using subscriber = void(*)(const void*, const event_args_t&);
-    explicit delegate(const subscriber callback) : m_handler(nullptr), m_callback(callback) {}
-    delegate(const delegate&) = delete;
-    delegate& operator=(const delegate&) = delete;
-    delegate(delegate&& other) = delete;
-    delegate& operator=(delegate&& other) = delete;
+    using Subscriber = void(*)(const void*, const EventArgsT&);
+    explicit Delegate(const Subscriber callback) : m_handler(nullptr), m_callback(callback) {}
+    Delegate(const Delegate&) = delete;
+    Delegate& operator=(const Delegate&) = delete;
+    Delegate(Delegate&& other) = delete;
+    Delegate& operator=(Delegate&& other) = delete;
 
-    /// Automatically deregisters the delegate from its event handler upon destruction to prevent dangling pointers.
-    ~delegate()
+    /// Automatically deregisters the Delegate from its EventHandler upon destruction to prevent dangling pointers.
+    ~Delegate()
     {
         if(m_handler)
         {
@@ -44,79 +44,87 @@ public:
     }
 
 private:
-    friend class event_handler<event_args_t>;
-    event_handler<event_args_t>* m_handler;
-    subscriber m_callback;
+    friend class EventHandler<EventArgsT>;
+    EventHandler<EventArgsT>* m_handler;
+    Subscriber m_callback;
 
-    /// Registers the event handler for future invocations and stores a pointer to it for automatic deregistration.
-    void register_handler(event_handler<event_args_t>& handler)
+    /// Registers the EventHandler for future invocations and stores a pointer to it for automatic deregistration.
+    void registerHandler(EventHandler<EventArgsT>& handler)
     {
-        if (m_handler)
-            throw std::logic_error("delegate already registered");
+        if(m_handler)
+            throw std::logic_error("Delegate already registered");
         m_handler = &handler;
     }
 
-    /// Deregisters the event handler to prevent future invocations and clears the stored pointer.
-    void deregister_handler() { m_handler = nullptr; }
+    /// Deregisters the EventHandler to prevent future invocations and clears the stored pointer.
+    void deregisterHandler() { m_handler = nullptr; }
 
     /// Invokes the callback with the provided sender and event arguments if the callback is valid.
-    void invoke(const void* sender, const event_args_t& event_args) { if(m_callback) m_callback(sender, event_args); }
+    void invoke(const void* sender, const EventArgsT& eventArgs) { if(m_callback) m_callback(sender, eventArgs); }
 };
 
-/// Event handler class that supports callbacks with specific event_args_t argument parameter.
-template <typename event_args_t>
-class event_handler
+/// EventHandler class that supports callbacks with a specific EventArgsT argument parameter.
+template <typename EventArgsT>
+class EventHandler
 {
 public:
-    ~event_handler()
+    ~EventHandler()
     {
         std::scoped_lock lock(m_mutex);
         for(auto d : m_delegates)
-            if(d) d->deregister_handler();
+            if(d) d->deregisterHandler();
     }
 
-    /// Adds a delegate to the event handler, ensuring that it is not added multiple times.
-    /// The delegate will be automatically deregistered upon destruction.
-    event_handler& operator+=(delegate<event_args_t>& d)
+    /// Adds a Delegate to the EventHandler, ensuring that it is not added multiple times.
+    /// The Delegate will be automatically deregistered upon destruction.
+    EventHandler& operator+=(Delegate<EventArgsT>& d)
     {
         std::scoped_lock lock(m_mutex);
         if(std::find(m_delegates.begin(), m_delegates.end(), &d) == m_delegates.end())
         {
             m_delegates.push_back(&d);
-            d.register_handler(*this);
+            d.registerHandler(*this);
         }
         return *this;
     }
 
-    /// Removes a delegate from the event handler, preventing future invocations of the callback.
-    event_handler& operator-=(delegate<event_args_t>& d)
+    /// Removes a Delegate from the EventHandler, preventing future invocations of the callback.
+    EventHandler& operator-=(Delegate<EventArgsT>& d)
     {
         std::scoped_lock lock(m_mutex);
         const auto it = std::find(m_delegates.begin(), m_delegates.end(), &d);
         if(it != m_delegates.end())
         {
-            d.deregister_handler();
+            d.deregisterHandler();
             m_delegates.erase(it);
         }
         return *this;
     }
 
-    /// Invokes all registered delegates with the provided sender and event arguments.
-    /// Callbacks can't subscribe/unsubscribe during invocation
-    void operator()(const void* sender, const event_args_t& event_args)
+    /// Invokes all registered Delegates with the provided sender and event arguments.
+    /// Callbacks cannot subscribe or unsubscribe during invocation.
+    void operator()(const void* sender, const EventArgsT& eventArgs)
     {
         // Hold the mutex for the entire duration of the invocation to prevent
-        // concurrent modification or destruction of delegates while invoking.
+        // concurrent modification or destruction of Delegates while invoking.
         std::scoped_lock lock(m_mutex);
         for(auto d : m_delegates)
-            if(d) d->invoke(sender, event_args);
+            if(d) d->invoke(sender, eventArgs);
     }
 
 private:
-    friend class delegate<event_args_t>;
+    friend class Delegate<EventArgsT>;
     std::mutex m_mutex;
-    std::vector<delegate<event_args_t>*> m_delegates;
+    std::vector<Delegate<EventArgsT>*> m_delegates;
 };
+
+#ifdef USE_STL_NAMING
+template <typename ev_args_t>
+using ev_hndlr = EventHandler<ev_args_t>;
+
+template <typename ev_args_t>
+using delegate = Delegate<ev_args_t>;
+#endif // USE_STL_NAMING
 
 } // namespace vwr
 
