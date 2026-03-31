@@ -23,7 +23,7 @@ template <typename EventArgsT>
 class Delegate
 {
 public:
-    using Subscriber = void(*)(const void*, const EventArgsT&);
+    using Subscriber = void (*)(const void*, const EventArgsT&);
     explicit Delegate(const Subscriber callback) : m_handler(nullptr), m_callback(callback) {}
     Delegate(const Delegate&) = delete;
     Delegate& operator=(const Delegate&) = delete;
@@ -59,8 +59,10 @@ private:
     /// Deregisters the EventHandler to prevent future invocations and clears the stored pointer.
     void deregisterHandler() { m_handler = nullptr; }
 
+    //clang-format off
     /// Invokes the callback with the provided sender and event arguments if the callback is valid.
     void invoke(const void* sender, const EventArgsT& eventArgs) { if(m_callback) m_callback(sender, eventArgs); }
+    //clang-format on
 };
 
 /// EventHandler class that supports callbacks with a specific EventArgsT argument parameter.
@@ -68,12 +70,14 @@ template <typename EventArgsT>
 class EventHandler
 {
 public:
+    //clang-format off
     ~EventHandler()
     {
         std::scoped_lock lock(m_mutex);
         for(auto d : m_delegates)
             if(d) d->deregisterHandler();
     }
+    //clang-format on
 
     /// Adds a Delegate to the EventHandler, ensuring that it is not added multiple times.
     /// The Delegate will be automatically deregistered upon destruction.
@@ -101,6 +105,7 @@ public:
         return *this;
     }
 
+    //clang-format off
     /// Invokes all registered Delegates with the provided sender and event arguments.
     /// Callbacks cannot subscribe or unsubscribe during invocation.
     void operator()(const void* sender, const EventArgsT& eventArgs)
@@ -111,6 +116,7 @@ public:
         for(auto d : m_delegates)
             if(d) d->invoke(sender, eventArgs);
     }
+    //clang-format on
 
 private:
     friend class Delegate<EventArgsT>;
@@ -119,11 +125,13 @@ private:
 };
 
 #ifdef USE_STL_NAMING
+// clang-format off
 template <typename ev_args_t>
 using ev_hndlr = EventHandler<ev_args_t>;
 
 template <typename ev_args_t>
 using delegate = Delegate<ev_args_t>;
+// clang-format on
 #endif // USE_STL_NAMING
 
 } // namespace vwr

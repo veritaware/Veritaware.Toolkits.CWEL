@@ -15,14 +15,18 @@ template <typename T>
 class PropertyChangedEventArgs
 {
 public:
+    //clang-format off
     PropertyChangedEventArgs(const T& oldValue, const T& newValue) // NOLINT(*-easily-swappable-parameters)
         : OldValue(oldValue), NewValue(newValue) {}
+    //clang-format on
     const T OldValue;
     const T NewValue;
 
 #ifdef USE_STL_NAMING
+    // clang-format off
     const T& old_value() const { return OldValue; }
     const T& new_value() const { return NewValue; }
+// clang-format on
 #endif // USE_STL_NAMING
 };
 
@@ -33,8 +37,11 @@ public:
     Property() : PropertyChanged(), m_value(), m_isInitialized(false) {}
     explicit Property(const T& value) : PropertyChanged(), m_value(value), m_isInitialized(true) {}
 
+    // clang-format off
     /// Copies the value from another Property without copying the event handlers, as those are not copyable or movable.
-    explicit Property(const Property& other) : PropertyChanged(), m_value(other.m_value), m_isInitialized(other.m_isInitialized) {}
+    explicit Property(const Property& other)
+        : PropertyChanged(), m_value(other.m_value), m_isInitialized(other.m_isInitialized) {}
+    // clang-format on
 
     /// Copies the value from another Property without copying the event handlers, as those are not copyable or movable,
     /// and raises the PropertyChanged event if the value has changed.
@@ -86,10 +93,12 @@ public:
     EventHandler<PropertyChangedEventArgs<T>> PropertyChanged;
 
 #ifdef USE_STL_NAMING
+    // clang-format off
     const T& get() const { return Get(); }
     void set(const T& value) { Set(value); }
     auto& property_changed() { return PropertyChanged; }
     const auto& property_changed() const { return PropertyChanged; }
+// clang-format on
 #endif // USE_STL_NAMING
 private:
     T m_value;
@@ -97,11 +106,13 @@ private:
 };
 
 #ifdef USE_STL_NAMING
+// clang-format off
 template <typename T>
 using prop_ch_ev_args = PropertyChangedEventArgs<T>;
 
 template <typename T>
 using property = Property<T>;
+// clang-format on
 #endif // USE_STL_NAMING
 
 } // namespace vwr

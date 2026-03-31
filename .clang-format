@@ -6,21 +6,26 @@ TabWidth: 4
 UseTab: Never
 
 BreakBeforeBraces: Allman
-NamespaceIndentation: Inner
+NamespaceIndentation: None
 IndentAccessModifiers: false
 AccessModifierOffset: -4
 
 SpaceBeforeParens: Never
 
 AllowShortFunctionsOnASingleLine: All
+AllowShortBlocksOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: All
 AlwaysBreakTemplateDeclarations: Yes
+BreakBeforeConceptDeclarations: Always
 
 PointerAlignment: Left
 ReferenceAlignment: Left
 DerivePointerAlignment: false
 
-AlignConsecutiveDeclarations: true
-AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: false
+AlignConsecutiveAssignments: false
+AlignAfterOpenBracket: BlockIndent
 AlignTrailingComments: true
 
 ColumnLimit: 120

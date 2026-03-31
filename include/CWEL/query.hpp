@@ -22,49 +22,51 @@ namespace vwr
 
 namespace detail
 {
-    template <typename, typename = void>
-    struct IsHashable : std::false_type {};
+// clang-format off
+template <typename, typename = void>
+struct IsHashable : std::false_type {};
 
-    template <typename U>
-    struct IsHashable<U, std::void_t<decltype(std::hash<U>{}(std::declval<const U&>()))>> : std::true_type {};
+template <typename U>
+struct IsHashable<U, std::void_t<decltype(std::hash<U>{}(std::declval<const U&>()))>> : std::true_type {};
 
-    template <typename U>
-    inline constexpr bool IsHashableV = IsHashable<U>::value;
+template <typename U>
+inline constexpr bool IsHashableV = IsHashable<U>::value;
 
-    template <typename, typename = void>
-    struct IsEqualityComparable : std::false_type {};
+template <typename, typename = void>
+struct IsEqualityComparable : std::false_type {};
 
-    template <typename U>
-    struct IsEqualityComparable<U, std::void_t<
-        decltype(std::equal_to<U>{}(std::declval<const U&>(), std::declval<const U&>()))
-    >> : std::true_type {};
+template <typename U>
+struct IsEqualityComparable<U, std::void_t<
+    decltype(std::equal_to<U>{}(std::declval<const U&>(), std::declval<const U&>()))
+>> : std::true_type {};
 
-    template <typename U>
-    inline constexpr bool CanUseUnorderedSetV = IsHashableV<U> && IsEqualityComparable<U>::value;
+template <typename U>
+inline constexpr bool CanUseUnorderedSetV = IsHashableV<U> && IsEqualityComparable<U>::value;
 
-    template <typename, typename, typename = void>
-    struct IsEqualityComparableWith : std::false_type {};
+template <typename, typename, typename = void>
+struct IsEqualityComparableWith : std::false_type {};
 
-    template <typename Left, typename Right>
-    struct IsEqualityComparableWith<Left, Right, std::void_t<
-        decltype(std::declval<const Left&>() == std::declval<const Right&>())
-    >> : std::bool_constant<std::is_convertible_v<
-        decltype(std::declval<const Left&>() == std::declval<const Right&>()), bool
-    >> {};
+template <typename Left, typename Right>
+struct IsEqualityComparableWith<Left, Right, std::void_t<
+    decltype(std::declval<const Left&>() == std::declval<const Right&>())
+>> : std::bool_constant<std::is_convertible_v<
+    decltype(std::declval<const Left&>() == std::declval<const Right&>()), bool
+>> {};
 
-    template <typename Left, typename Right>
-    inline constexpr bool IsEqualityComparableWithV = IsEqualityComparableWith<Left, Right>::value;
+template <typename Left, typename Right>
+inline constexpr bool IsEqualityComparableWithV = IsEqualityComparableWith<Left, Right>::value;
 
-    template <typename, typename, typename = void>
-    struct IsStaticCastable : std::false_type {};
+template <typename, typename, typename = void>
+struct IsStaticCastable : std::false_type {};
 
-    template <typename From, typename To>
-    struct IsStaticCastable<From, To, std::void_t<
-        decltype(static_cast<To>(std::declval<From>()))
-    >> : std::true_type {};
+template <typename From, typename To>
+struct IsStaticCastable<From, To, std::void_t<
+    decltype(static_cast<To>(std::declval<From>()))
+>> : std::true_type {};
 
-    template <typename From, typename To>
-    inline constexpr bool IsStaticCastableV = IsStaticCastable<From, To>::value;
+template <typename From, typename To>
+inline constexpr bool IsStaticCastableV = IsStaticCastable<From, To>::value;
+//clang-format on
 } // namespace detail
 
 template <typename T>
@@ -74,13 +76,15 @@ public:
     explicit Query(std::vector<T> data) : m_data(std::move(data)) {}
     explicit Query(std::initializer_list<T> data) : m_data(data) {}
     template <typename InputIt>
+    // clang-format off
     explicit Query(InputIt begin, InputIt end)
-    requires (!std::is_integral_v<InputIt>) : m_data(begin, end) {}
+        requires (!std::is_integral_v<InputIt>) : m_data(begin, end) {}
+    // clang-format on
 
     /// Returns a copy of the underlying data vector.
     std::vector<T> Get() const { return m_data; }
 
-// region: Single Element Queries
+    // region: Single Element Queries
     /// Aggregates the elements of the collection using the specified binary predicate
     /// and the provided seed as the initial accumulator.
     template <typename Predicate>
@@ -142,10 +146,12 @@ public:
     /// Returns the first element of a sequence, or a default value if no element is found.
     T FirstOrDefault() const
     {
+        //clang-format off
         static_assert(
             std::is_default_constructible_v<T>,
             "Query<T>::FirstOrDefault() requires T to be default-constructible."
         );
+        //clang-format on
         if(m_data.empty())
             return T{};
         return m_data.front();
@@ -186,10 +192,12 @@ public:
     /// Returns the last element of a sequence, or a default value if no element is found.
     T LastOrDefault() const
     {
+        //clang-format off
         static_assert(
             std::is_default_constructible_v<T>,
             "Query<T>::LastOrDefault() requires T to be default-constructible."
         );
+        //clang-format on
         if(m_data.empty())
             return T{};
         return m_data.back();
@@ -230,19 +238,21 @@ public:
     /// Returns a single, specific element of a sequence, or a default value if that element is not found.
     T SingleOrDefault() const
     {
+        //clang-format off
         static_assert(
             std::is_default_constructible_v<T>,
             "Query<T>::SingleOrDefault() requires T to be default-constructible."
         );
+        //clang-format on
         if(m_data.size() > 1)
             throw std::out_of_range("Query contains more than one element.");
         if(m_data.empty())
             return T{};
         return m_data.front();
     }
-// endregion: Single Element Queries
+    // endregion: Single Element Queries
 
-// region: Query Modifiers
+    // region: Query Modifiers
     template <typename U>
     Query<U> Cast() const
     {
@@ -461,11 +471,13 @@ public:
         return Query(std::move(result));
     }
 
+    //clang-format off
     /// Correlates the elements of two sequences based on matching keys.
     /// The default equality comparer is used to compare keys selected from each sequence.
     template <typename U, typename OuterKeySelector, typename InnerKeySelector>
     Query<std::pair<T, U>> Join(const Query<U>& other, OuterKeySelector outerKeySelector,
                                 InnerKeySelector innerKeySelector) const
+    //clang-format on
     {
         using outerKeyT = std::invoke_result_t<OuterKeySelector&, const T&>;
         using innerKeyT = std::invoke_result_t<InnerKeySelector&, const U&>;
@@ -487,11 +499,13 @@ public:
         return Query<std::pair<T, U>>(std::move(result));
     }
 
+    //clang-format off
     /// Correlates the elements of two sequences based on matching keys.
     /// The specified equality comparer is used to compare keys selected from each sequence.
     template <typename U, typename OuterKeySelector, typename InnerKeySelector, typename EqualityComparer>
     Query<std::pair<T, U>> Join(const Query<U>& other, OuterKeySelector outerKeySelector,
                                 InnerKeySelector innerKeySelector, EqualityComparer comparer) const
+    //clang-format on
     {
         std::vector<std::pair<T, U>> result;
         for(const auto& value : m_data)
@@ -625,9 +639,9 @@ public:
         }
         return Query(std::move(result));
     }
-// endregion: Query Modifiers
+    // endregion: Query Modifiers
 
-// region: Check Queries
+    // region: Check Queries
     /// Determines whether all elements of a sequence satisfy a condition.
     template <typename Predicate>
     bool All(Predicate predicate) const
@@ -647,7 +661,8 @@ public:
     /// For integral types, returns a double to avoid truncation.
     template <typename U = T>
     auto Average() const -> std::conditional_t<std::is_integral_v<T>, double, T>
-    requires (std::is_arithmetic_v<U>) {
+        requires(std::is_arithmetic_v<U>)
+    {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
         using Result = std::conditional_t<std::is_integral_v<T>, double, T>;
@@ -660,16 +675,14 @@ public:
     }
 
     /// Determines whether a sequence contains a specified element by using the default equality comparer.
-    bool Contains(const T& element) const
-    {
-        return std::find(m_data.begin(), m_data.end(), element) != m_data.end();
-    }
+    bool Contains(const T& element) const { return std::find(m_data.begin(), m_data.end(), element) != m_data.end(); }
 
     /// Returns the maximum value in a sequence of values.
     /// Only available when T is an arithmetic type.
     template <typename U = T>
     T Max() const
-    requires (std::is_arithmetic_v<U>) {
+        requires(std::is_arithmetic_v<U>)
+    {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
         return *std::max_element(m_data.begin(), m_data.end());
@@ -679,7 +692,8 @@ public:
     /// Only available when T is an arithmetic type.
     template <typename U = T>
     T Min() const
-    requires (std::is_arithmetic_v<U>) {
+        requires(std::is_arithmetic_v<U>)
+    {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
         return *std::min_element(m_data.begin(), m_data.end());
@@ -689,14 +703,16 @@ public:
     /// Only available when T is an arithmetic type.
     template <typename U = T>
     T Sum() const
-    requires (std::is_arithmetic_v<U>) {
+        requires(std::is_arithmetic_v<U>)
+    {
         if(m_data.empty())
             throw std::out_of_range("Query is empty.");
         return std::accumulate(m_data.begin(), m_data.end(), static_cast<T>(0));
     }
-// endregion: Check Queries
+    // endregion: Check Queries
 
 #ifdef USE_STL_NAMING
+    // clang-format off
     std::vector<T> get() const { return Get(); }
     T aggregate(T seed, auto predicate) const { return Aggregate(seed, predicate); }
     T aggregate(auto predicate) const { return Aggregate(predicate); }
@@ -739,6 +755,7 @@ public:
     template <typename U = T> T max() const { return Max<U>(); }
     template <typename U = T> T min() const { return Min<U>(); }
     template <typename U = T> T sum() const { return Sum<U>(); }
+// clang-format on
 #endif // USE_STL_NAMING
 
 private:
@@ -746,8 +763,10 @@ private:
 };
 
 #ifdef USE_STL_NAMING
+// clang-format off
 template <typename T>
 using query = Query<T>;
+// clang-format on
 #endif // USE_STL_NAMING
 
 } // namespace vwr
