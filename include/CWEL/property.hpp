@@ -25,11 +25,11 @@ template <typename T>
 class property
 {
 public:
-    property() = default;
-    explicit property(const T& value) : property_changed(), m_value(value) {}
+    property() : property_changed(), m_value(), is_initialized(false) {}
+    explicit property(const T& value) : property_changed(), m_value(value), is_initialized(true) {}
 
     /// Copies the value from other property without copying the event handlers as those are not copyable/movable.
-    explicit property(const property& other) : property_changed(), m_value(other.m_value) {}
+    explicit property(const property& other) : property_changed(), m_value(other.m_value), is_initialized(other.is_initialized) {}
 
     /// Copies the value from other property without copying the event handlers as those are not copyable/movable
     /// and raises the property_changed event if the value has changed.
@@ -52,8 +52,14 @@ public:
     const T& operator()() const { return m_value; }
 
     /// Sets the property value and raises the property_changed event if the value has changed.
+    /// The property_changed event is not raised if the value is being initialized for the first time.
     void set(const T& value)
     {
+        if(!is_initialized)
+        {
+            m_value = value;
+            return;
+        }
         if(m_value == value)
             return;
         property_changed_event_args<T> event_args(m_value, value);
@@ -62,6 +68,7 @@ public:
     }
 
     /// Sets the property value and raises the property_changed event if the value has changed.
+    /// The property_changed event is not raised if the value is being initialized for the first time.
     property& operator=(const T& value)
     {
         set(value);
@@ -73,6 +80,7 @@ public:
     event_handler<property_changed_event_args<T>> property_changed;
 private:
     T m_value;
+    bool is_initialized;
 };
 
 } // namespace vwr
